@@ -1,0 +1,189 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Patient {
+  id          String   @id @default(auto()) @map("_id")
+  name        String
+  email       String   @unique
+  password    String
+  phone       String
+  address     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  pharmacies  Pharmacy[]
+  prescriptions Prescription[]
+  orders      Order[]
+  subscriptions Subscription[]
+}
+
+
+model Pharmacy {
+  id          String   @id @default(auto()) @map("_id")
+  name        String
+  owner       User     @relation(fields: [ownerId], references: [id])
+  ownerId     String
+  address     String
+  latitude    Float
+  longitude   Float
+  phone       String
+  isVerified  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  medicines   PharmacyMedicine[]
+  requests    PrescriptionRequest[]
+  orders      Order[]
+  subscriptions Subscription[]
+}
+
+model Prescription {
+  id          String   @id @default(auto()) @map("_id")
+  patient     User     @relation(fields: [patientId], references: [id])
+  patientId   String
+  filePath    String
+  uploadedAt  DateTime @default(now())
+  requests    PrescriptionRequest[]
+}
+
+model PrescriptionRequest {
+  id          String   @id @default(auto()) @map("_id")
+  prescription Prescription @relation(fields: [prescriptionId], references: [id])
+  prescriptionId String
+  pharmacy    Pharmacy @relation(fields: [pharmacyId], references: [id])
+  pharmacyId  String
+  status      RequestStatus @default(PENDING)
+  responseMessage String?
+  estimatedPrice Float?
+  responseTime DateTime?
+  createdAt   DateTime @default(now())
+}
+
+enum RequestStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+  EXPIRED
+}
+
+model Order {
+  id          String   @id @default(auto()) @map("_id")
+  patient     User     @relation(fields: [patientId], references: [id])
+  patientId   String
+  pharmacy    Pharmacy @relation(fields: [pharmacyId], references: [id])
+  pharmacyId  String
+  totalPrice  Float
+  paymentStatus PaymentStatus
+  orderStatus OrderStatus @default(PROCESSING)
+  createdAt   DateTime @default(now())
+  orderItems  OrderItem[]
+  payment     Payment?
+  delivery    Delivery?
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum OrderStatus {
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model OrderItem {
+  id          String   @id @default(auto()) @map("_id")
+  order       Order    @relation(fields: [orderId], references: [id])
+  orderId     String
+  medicine    Medicine @relation(fields: [medicineId], references: [id])
+  medicineId  String
+  quantity    Int
+  pricePerUnit Float
+}
+
+model Medicine {
+  id          String   @id @default(auto()) @map("_id")
+  name        String
+  brand       String
+  category    String
+  description String?
+  prescriptionRequired Boolean @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  pharmacies  PharmacyMedicine[]
+  orderItems  OrderItem[]
+  subscriptions Subscription[]
+}
+
+model Payment {
+  id          String   @id @default(auto()) @map("_id")
+  order       Order    @relation(fields: [orderId], references: [id])
+  orderId     String
+  transactionId String @unique
+  amount      Float
+  paymentMethod PaymentMethod
+  paymentStatus PaymentStatus
+  createdAt   DateTime @default(now())
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  PAYPAL
+  UPI
+  NET_BANKING
+}
+
+model Subscription {
+  id          String   @id @default(auto()) @map("_id")
+  patient     User     @relation(fields: [patientId], references: [id])
+  patientId   String
+  pharmacy    Pharmacy @relation(fields: [pharmacyId], references: [id])
+  pharmacyId  String
+  medicine    Medicine @relation(fields: [medicineId], references: [id])
+  medicineId  String
+  quantityPerDelivery Int
+  frequency   SubscriptionFrequency
+  nextDeliveryDate DateTime
+  status      SubscriptionStatus @default(ACTIVE)
+  createdAt   DateTime @default(now())
+}
+
+enum SubscriptionFrequency {
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+}
+
+model Delivery {
+  id          String   @id @default(auto()) @map("_id")
+  order       Order    @relation(fields: [orderId], references: [id])
+  orderId     String
+  deliveryPartner String
+  trackingNumber String?
+  status      DeliveryStatus @default(PENDING)
+  estimatedDelivery DateTime
+  deliveredAt DateTime?
+}
+
+enum DeliveryStatus {
+  PENDING
+  SHIPPED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  FAILED
+}
