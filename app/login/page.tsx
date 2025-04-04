@@ -51,7 +51,9 @@ export default function LoginPage() {
 
       // Successful login - redirect based on role
       router.push(
-        userType === "PHARMACY" ? "/pharmacy/dashboard" : "/patient/dashboard"
+        userType === "PHARMACY"
+          ? "/dashboardNew/pharmacy"
+          : "/dashboardNew/patient"
       );
     } catch (error) {
       toast({

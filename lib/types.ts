@@ -6,7 +6,7 @@ export type SessionUser = {
   name?: string | null;
   email?: string | null;
   image?: string | null;
-  role: "PATIENT" | "PHARMACY" | "ADMIN";
+  role: "PATIENT" | "PHARMACY";
   patient?: Patient | null;
   pharmacy?: Pharmacy | null;
 };
