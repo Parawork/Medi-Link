@@ -1,80 +1,85 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { useToast } from "@/components/ui/use-toast"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [userType, setUserType] = useState<string | undefined>(undefined)
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
-  const { toast } = useToast()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [userType, setUserType] = useState<"PATIENT" | "PHARMACY">("PATIENT");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!email || !password || !userType) {
+    if (!email || !password) {
       toast({
         title: "Error",
-        description: "Please fill in all fields including user type.",
+        description: "Please fill in all fields.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
-      // In a real app, this would be an API call to authenticate
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const result = await signIn("credentials", {
+        email,
+        password,
+        role: userType,
+        redirect: false,
+      });
 
-      // Mock authentication - in a real app, this would check credentials
-      if (email && password) {
-        // Store user info in localStorage (in a real app, use secure methods)
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            email,
-            type: userType,
-          }),
-        )
-
-        // Redirect to appropriate dashboard
-        router.push(userType === "pharmacy" ? "/pharmacy/dashboard" : "/customer/dashboard")
-      } else {
-        toast({
-          title: "Error",
-          description: "Invalid credentials. Please try again.",
-          variant: "destructive",
-        })
+      if (result?.error) {
+        throw new Error(result.error);
       }
+
+      // Successful login - redirect based on role
+      router.push(
+        userType === "PHARMACY" ? "/pharmacy/dashboard" : "/patient/dashboard"
+      );
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to login. Please try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to login. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-[#0a2351] flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-3xl p-8 shadow-lg">
-        <h1 className="text-2xl font-bold text-center text-[#0a2351] mb-8">Welcome to Medi-Link</h1>
+        <h1 className="text-2xl font-bold text-center text-[#0a2351] mb-8">
+          Welcome to Medi-Link
+        </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <label htmlFor="email" className="block text-sm font-medium text-[#0a2351]">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-[#0a2351]"
+            >
               Enter email to login
             </label>
             <Input
@@ -89,7 +94,10 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="password" className="block text-sm font-medium text-[#0a2351]">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-[#0a2351]"
+            >
               Enter Password
             </label>
             <Input
@@ -104,16 +112,27 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="userType" className="block text-sm font-medium text-[#0a2351]">
+            <label
+              htmlFor="userType"
+              className="block text-sm font-medium text-[#0a2351]"
+            >
               User Type
             </label>
-            <Select onValueChange={setUserType}>
-              <SelectTrigger id="userType" className="w-full p-3 border border-gray-300 rounded-md">
+            <Select
+              onValueChange={(value: "PATIENT" | "PHARMACY") =>
+                setUserType(value)
+              }
+              value={userType}
+            >
+              <SelectTrigger
+                id="userType"
+                className="w-full p-3 border border-gray-300 rounded-md"
+              >
                 <SelectValue placeholder="Select user type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="pharmacy">Pharmacy</SelectItem>
-                <SelectItem value="customer">Customer</SelectItem>
+                <SelectItem value="PATIENT">Patient</SelectItem>
+                <SelectItem value="PHARMACY">Pharmacy</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -130,7 +149,10 @@ export default function LoginPage() {
         <div className="mt-6 text-center">
           <p className="text-sm text-[#0a2351]">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="font-medium text-blue-600 hover:underline">
+            <Link
+              href="/signup"
+              className="font-medium text-blue-600 hover:underline"
+            >
               SignUp
             </Link>
           </p>
@@ -147,6 +169,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

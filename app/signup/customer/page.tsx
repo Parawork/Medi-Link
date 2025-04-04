@@ -1,8 +1,6 @@
 "use client";
 
-import type React from "react";
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
@@ -39,20 +37,6 @@ export default function CustomerSignupPage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  // Load initial signup data if available
-  useEffect(() => {
-    const savedData = localStorage.getItem("signupData");
-    if (savedData) {
-      const { email, fullName } = JSON.parse(savedData);
-      setFormData((prev) => ({
-        ...prev,
-        email: email || "",
-        fullName: fullName || "",
-        username: email ? email.split("@")[0] : "",
-      }));
-    }
-  }, []);
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -85,7 +69,10 @@ export default function CustomerSignupPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          role: "PATIENT", // Explicitly set role for patient signup
+        }),
       });
 
       const data = await response.json();
@@ -96,11 +83,8 @@ export default function CustomerSignupPage() {
 
       toast({
         title: "Success",
-        description: "Customer account created successfully!",
+        description: "Account created successfully! Please login.",
       });
-
-      // Clear signup data
-      localStorage.removeItem("signupData");
 
       // Redirect to login
       router.push("/login");
@@ -125,7 +109,7 @@ export default function CustomerSignupPage() {
           Welcome to Medi-Link
         </h1>
         <h2 className="text-lg text-center text-[#0a2351] mb-6">
-          Customer Signup
+          Patient Signup
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">

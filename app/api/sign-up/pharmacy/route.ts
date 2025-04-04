@@ -4,26 +4,23 @@ import { prisma } from "@/app/utils/db";
 import { z } from "zod";
 import { writeFile } from "fs/promises";
 import path from "path";
-import { v4 as uuidv4 } from "uuid";
-
-// Ensure the upload directory exists
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploadedFiles");
-const UPLOAD_PATH_PREFIX = "/uploadedFiles";
+import fs from "fs/promises";
 
 const signupSchema = z
   .object({
-    name: z.string().min(1),
-    email: z.string().email(),
-    password: z.string().min(1),
+    name: z.string().min(1, "Pharmacy name too short"),
+    licenseNumber: z.string().min(1, "License number required"),
+    streetAddress: z.string().min(1, "Address too short"),
+    city: z.string().min(1, "City name too short"),
+    stateProvince: z.string().min(1, "State/province too short"),
+    postalCode: z.string().min(1, "Postal code too short"),
+    country: z.string().min(1, "Country name too short"),
+    email: z.string().email("Invalid email address"),
+    phone: z.string().min(1, "Phone number too short"),
+    username: z.string().min(1, "Username must be at least 3 characters"),
+    password: z.string().min(1, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
-    phone: z.string().min(1),
-    streetAddress: z.string().min(1),
-    city: z.string().min(1),
-    stateProvince: z.string().min(1),
-    postalCode: z.string().min(1),
-    country: z.string().min(1),
-    username: z.string().min(1).max(20),
-    licenseNumber: z.string().min(1),
+    role: z.enum(["PATIENT", "PHARMACY", "ADMIN"]),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -33,10 +30,18 @@ const signupSchema = z
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
-    const jsonData = Object.fromEntries(formData.entries());
+
+    // Extract regular form data
+    const formDataObj = Object.fromEntries(formData.entries());
+    const { confirmPassword, role, ...data } = formDataObj;
 
     // Validate input
-    const validationResult = signupSchema.safeParse(jsonData);
+    const validationResult = signupSchema.safeParse({
+      ...data,
+      confirmPassword,
+      role: "PHARMACY", // Force role to be PHARMACY for this endpoint
+    });
+
     if (!validationResult.success) {
       return NextResponse.json(
         { error: "Validation failed", details: validationResult.error.errors },
@@ -44,80 +49,112 @@ export async function POST(request: Request) {
       );
     }
 
-    const { confirmPassword, ...data } = validationResult.data;
-    const licenseFile = formData.get("licenseFile") as File | null;
+    // Check if user already exists
+    const existingUserByEmail = await prisma.user.findUnique({
+      where: { email: data.email as string },
+    });
 
-    // Validate file
-    if (!licenseFile) {
+    if (existingUserByEmail) {
+      return NextResponse.json(
+        { error: "User with this email already exists" },
+        { status: 409 }
+      );
+    }
+
+    const existingUserByUsername = await prisma.user.findUnique({
+      where: { username: data.username as string },
+    });
+
+    if (existingUserByUsername) {
+      return NextResponse.json(
+        { error: "Username already taken" },
+        { status: 409 }
+      );
+    }
+
+    const existingPharmacyByLicense = await prisma.pharmacy.findUnique({
+      where: { licenseNumber: data.licenseNumber as string },
+    });
+
+    if (existingPharmacyByLicense) {
+      return NextResponse.json(
+        { error: "License number already registered" },
+        { status: 409 }
+      );
+    }
+
+    // Handle file upload
+    const file = formData.get("licenseFile") as File | null;
+    if (!file) {
       return NextResponse.json(
         { error: "License file is required" },
         { status: 400 }
       );
     }
 
-    // Check if pharmacy already exists
-    const existingPharmacy = await prisma.pharmacy.findFirst({
-      where: {
-        OR: [
-          { email: data.email },
-          { username: data.username },
-          { licenseNumber: data.licenseNumber },
-        ],
-      },
-    });
-
-    if (existingPharmacy) {
-      let errorField = "";
-      if (existingPharmacy.email === data.email) errorField = "email";
-      if (existingPharmacy.username === data.username) errorField = "username";
-      if (existingPharmacy.licenseNumber === data.licenseNumber)
-        errorField = "license number";
-
-      return NextResponse.json(
-        { error: `Pharmacy with this ${errorField} already exists` },
-        { status: 409 }
-      );
-    }
-
-    // Process file upload
-    const bytes = await licenseFile.arrayBuffer();
+    const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Generate unique filename
-    const fileExt = path.extname(licenseFile.name);
-    const fileName = `${uuidv4()}${fileExt}`;
-    const filePath = path.join(UPLOAD_DIR, fileName);
-    const publicUrl = `${UPLOAD_PATH_PREFIX}/${fileName}`;
+    // Create uploads directory if it doesn't exist
+    const uploadDir = path.join(process.cwd(), "public/uploads/licenses");
+    await fs.mkdir(uploadDir, { recursive: true });
 
-    // Save file to public/uploads directory
+    // Generate unique filename
+    const timestamp = Date.now();
+    const ext = path.extname(file.name);
+    const filename = `${data.licenseNumber}-${timestamp}${ext}`;
+    const filePath = path.join(uploadDir, filename);
+
+    // Save file
     await writeFile(filePath, buffer);
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(data.password, 12);
+    const hashedPassword = await bcrypt.hash(data.password as string, 12);
 
-    // Create pharmacy in database
-    const pharmacy = await prisma.pharmacy.create({
-      data: {
-        ...data,
-        password: hashedPassword,
-        licenseFile: publicUrl,
-        verified: false,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        username: true,
-        verified: true,
-        licenseNumber: true,
-      },
+    // Create user and pharmacy in a transaction
+    const result = await prisma.$transaction(async (prisma) => {
+      // Create base user
+      const user = await prisma.user.create({
+        data: {
+          email: data.email as string,
+          username: data.username as string,
+          password: hashedPassword,
+          phone: data.phone as string,
+          role: "PHARMACY",
+        },
+      });
+
+      // Create pharmacy profile
+      const pharmacy = await prisma.pharmacy.create({
+        data: {
+          userId: user.id,
+          name: data.name as string,
+          phone: data.phone as string,
+          licenseNumber: data.licenseNumber as string,
+          streetAddress: data.streetAddress as string,
+          city: data.city as string,
+          stateProvince: data.stateProvince as string,
+          postalCode: data.postalCode as string,
+          country: data.country as string,
+          licenseFile: `/uploads/licenses/${filename}`,
+          verified: false, // Initially not verified
+        },
+      });
+
+      return { user, pharmacy };
     });
 
     return NextResponse.json(
       {
         success: true,
-        pharmacy,
-        message: "Pharmacy registered successfully! Awaiting verification.",
+        user: {
+          id: result.user.id,
+          email: result.user.email,
+          role: result.user.role,
+        },
+        pharmacy: {
+          name: result.pharmacy.name,
+          licenseNumber: result.pharmacy.licenseNumber,
+        },
       },
       { status: 201 }
     );

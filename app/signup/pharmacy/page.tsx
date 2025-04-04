@@ -1,7 +1,6 @@
 "use client";
 
-import type React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
@@ -28,20 +27,6 @@ export default function PharmacySignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-
-  // Load initial signup data if available
-  useEffect(() => {
-    const savedData = localStorage.getItem("signupData");
-    if (savedData) {
-      const { email, fullName } = JSON.parse(savedData);
-      setFormData((prev) => ({
-        ...prev,
-        email: email || "",
-        name: fullName || "",
-        username: email ? email.split("@")[0] : "",
-      }));
-    }
-  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -88,10 +73,12 @@ export default function PharmacySignupPage() {
 
       // Append the license file
       formDataToSend.append("licenseFile", licenseFile);
+      // Explicitly set role
+      formDataToSend.append("role", "PHARMACY");
 
       const response = await fetch("/api/sign-up/pharmacy", {
         method: "POST",
-        body: formDataToSend, // No Content-Type header needed for FormData
+        body: formDataToSend,
       });
 
       const data = await response.json();
@@ -105,9 +92,6 @@ export default function PharmacySignupPage() {
         description:
           "Pharmacy account created successfully! Awaiting verification.",
       });
-
-      // Clear signup data
-      localStorage.removeItem("signupData");
 
       // Redirect to login
       router.push("/login");
