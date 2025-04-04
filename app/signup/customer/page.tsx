@@ -1,15 +1,21 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { useToast } from "@/components/ui/use-toast"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function CustomerSignupPage() {
   const [formData, setFormData] = useState({
@@ -28,36 +34,38 @@ export default function CustomerSignupPage() {
     username: "",
     password: "",
     confirmPassword: "",
-  })
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
-  const { toast } = useToast()
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
 
   // Load initial signup data if available
   useEffect(() => {
-    const savedData = localStorage.getItem("signupData")
+    const savedData = localStorage.getItem("signupData");
     if (savedData) {
-      const { email, fullName } = JSON.parse(savedData)
+      const { email, fullName } = JSON.parse(savedData);
       setFormData((prev) => ({
         ...prev,
         email: email || "",
         fullName: fullName || "",
         username: email ? email.split("@")[0] : "",
-      }))
+      }));
     }
-  }, [])
+  }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     // Validate form
     if (formData.password !== formData.confirmPassword) {
@@ -65,50 +73,73 @@ export default function CustomerSignupPage() {
         title: "Error",
         description: "Passwords do not match.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
-      // In a real app, this would be an API call to register the customer
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      const response = await fetch("/api/sign-up/customer", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create account");
+      }
 
       toast({
         title: "Success",
         description: "Customer account created successfully!",
-      })
+      });
 
       // Clear signup data
-      localStorage.removeItem("signupData")
+      localStorage.removeItem("signupData");
 
       // Redirect to login
-      router.push("/login")
+      router.push("/login");
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to create account. Please try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to create account. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-[#0a2351] flex items-center justify-center p-4">
       <div className="w-full max-w-2xl bg-[#e6eaf2] rounded-3xl p-8 shadow-lg my-8">
-        <h1 className="text-2xl font-bold text-center text-[#0a2351] mb-2">Welcome to Medi-Link</h1>
-        <h2 className="text-lg text-center text-[#0a2351] mb-6">Customer Signup</h2>
+        <h1 className="text-2xl font-bold text-center text-[#0a2351] mb-2">
+          Welcome to Medi-Link
+        </h1>
+        <h2 className="text-lg text-center text-[#0a2351] mb-6">
+          Customer Signup
+        </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="bg-white p-4 rounded-lg">
-            <h3 className="text-sm font-medium text-[#0a2351] mb-4">Personal Information</h3>
+            <h3 className="text-sm font-medium text-[#0a2351] mb-4">
+              Personal Information
+            </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label htmlFor="fullName" className="block text-xs text-[#0a2351]">
+                <label
+                  htmlFor="fullName"
+                  className="block text-xs text-[#0a2351]"
+                >
                   Full Name
                 </label>
                 <Input
@@ -154,7 +185,10 @@ export default function CustomerSignupPage() {
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="dateOfBirth" className="block text-xs text-[#0a2351]">
+                <label
+                  htmlFor="dateOfBirth"
+                  className="block text-xs text-[#0a2351]"
+                >
                   Date of Birth
                 </label>
                 <Input
@@ -169,28 +203,43 @@ export default function CustomerSignupPage() {
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="gender" className="block text-xs text-[#0a2351]">
+                <label
+                  htmlFor="gender"
+                  className="block text-xs text-[#0a2351]"
+                >
                   Gender
                 </label>
-                <Select onValueChange={(value) => handleSelectChange("gender", value)}>
-                  <SelectTrigger id="gender" className="w-full p-2 text-sm border border-gray-300 rounded-md">
+                <Select
+                  onValueChange={(value) => handleSelectChange("gender", value)}
+                >
+                  <SelectTrigger
+                    id="gender"
+                    className="w-full p-2 text-sm border border-gray-300 rounded-md"
+                  >
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="male">Male</SelectItem>
                     <SelectItem value="female">Female</SelectItem>
                     <SelectItem value="other">Other</SelectItem>
-                    <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                    <SelectItem value="prefer-not-to-say">
+                      Prefer not to say
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            <h3 className="text-sm font-medium text-[#0a2351] mt-6 mb-4">Address Information</h3>
+            <h3 className="text-sm font-medium text-[#0a2351] mt-6 mb-4">
+              Address Information
+            </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label htmlFor="streetAddress" className="block text-xs text-[#0a2351]">
+                <label
+                  htmlFor="streetAddress"
+                  className="block text-xs text-[#0a2351]"
+                >
                   Street Address
                 </label>
                 <Input
@@ -220,7 +269,10 @@ export default function CustomerSignupPage() {
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="stateProvince" className="block text-xs text-[#0a2351]">
+                <label
+                  htmlFor="stateProvince"
+                  className="block text-xs text-[#0a2351]"
+                >
                   State/Province
                 </label>
                 <Input
@@ -235,7 +287,10 @@ export default function CustomerSignupPage() {
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="postalCode" className="block text-xs text-[#0a2351]">
+                <label
+                  htmlFor="postalCode"
+                  className="block text-xs text-[#0a2351]"
+                >
                   Postal Code
                 </label>
                 <Input
@@ -250,7 +305,10 @@ export default function CustomerSignupPage() {
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="country" className="block text-xs text-[#0a2351]">
+                <label
+                  htmlFor="country"
+                  className="block text-xs text-[#0a2351]"
+                >
                   Country
                 </label>
                 <Input
@@ -265,11 +323,16 @@ export default function CustomerSignupPage() {
               </div>
             </div>
 
-            <h3 className="text-sm font-medium text-[#0a2351] mt-6 mb-4">Medical Information</h3>
+            <h3 className="text-sm font-medium text-[#0a2351] mt-6 mb-4">
+              Medical Information
+            </h3>
 
             <div className="space-y-4">
               <div className="space-y-1">
-                <label htmlFor="medicalConditions" className="block text-xs text-[#0a2351]">
+                <label
+                  htmlFor="medicalConditions"
+                  className="block text-xs text-[#0a2351]"
+                >
                   Medical Conditions (Optional)
                 </label>
                 <Textarea
@@ -283,7 +346,10 @@ export default function CustomerSignupPage() {
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="allergies" className="block text-xs text-[#0a2351]">
+                <label
+                  htmlFor="allergies"
+                  className="block text-xs text-[#0a2351]"
+                >
                   Allergies (Optional)
                 </label>
                 <Textarea
@@ -299,11 +365,16 @@ export default function CustomerSignupPage() {
           </div>
 
           <div className="bg-white p-4 rounded-lg">
-            <h3 className="text-sm font-medium text-[#0a2351] mb-4">Account Details</h3>
+            <h3 className="text-sm font-medium text-[#0a2351] mb-4">
+              Account Details
+            </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label htmlFor="username" className="block text-xs text-[#0a2351]">
+                <label
+                  htmlFor="username"
+                  className="block text-xs text-[#0a2351]"
+                >
                   Username
                 </label>
                 <Input
@@ -320,7 +391,10 @@ export default function CustomerSignupPage() {
               <div className="space-y-1 md:col-span-1"></div>
 
               <div className="space-y-1">
-                <label htmlFor="password" className="block text-xs text-[#0a2351]">
+                <label
+                  htmlFor="password"
+                  className="block text-xs text-[#0a2351]"
+                >
                   Password
                 </label>
                 <Input
@@ -336,7 +410,10 @@ export default function CustomerSignupPage() {
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="confirmPassword" className="block text-xs text-[#0a2351]">
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-xs text-[#0a2351]"
+                >
                   Confirm Password
                 </label>
                 <Input
@@ -365,7 +442,10 @@ export default function CustomerSignupPage() {
         <div className="mt-4 text-center">
           <p className="text-sm text-[#0a2351]">
             Already have an account?{" "}
-            <Link href="/login" className="font-medium text-blue-600 hover:underline">
+            <Link
+              href="/login"
+              className="font-medium text-blue-600 hover:underline"
+            >
               Login
             </Link>
           </p>
@@ -382,6 +462,5 @@ export default function CustomerSignupPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-
