@@ -7,18 +7,10 @@ import { signIn } from "next-auth/react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [userType, setUserType] = useState<"PATIENT" | "PHARMACY">("PATIENT");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
@@ -41,7 +33,6 @@ export default function LoginPage() {
       const result = await signIn("credentials", {
         email,
         password,
-        role: userType,
         redirect: false,
       });
 
@@ -49,9 +40,17 @@ export default function LoginPage() {
         throw new Error(result.error);
       }
 
-      // Successful login - redirect based on role
+      // Fetch the session to get user role after successful login
+      const sessionResponse = await fetch("/api/auth/session");
+      const session = await sessionResponse.json();
+
+      if (!session?.user?.role) {
+        throw new Error("Unable to determine user role");
+      }
+
+      // Redirect based on the role from session
       router.push(
-        userType === "PHARMACY"
+        session.user.role === "PHARMACY"
           ? "/dashboardNew/pharmacy"
           : "/dashboardNew/patient"
       );
@@ -111,32 +110,6 @@ export default function LoginPage() {
               required
               className="w-full p-3 border border-gray-300 rounded-md"
             />
-          </div>
-
-          <div className="space-y-2">
-            <label
-              htmlFor="userType"
-              className="block text-sm font-medium text-[#0a2351]"
-            >
-              User Type
-            </label>
-            <Select
-              onValueChange={(value: "PATIENT" | "PHARMACY") =>
-                setUserType(value)
-              }
-              value={userType}
-            >
-              <SelectTrigger
-                id="userType"
-                className="w-full p-3 border border-gray-300 rounded-md"
-              >
-                <SelectValue placeholder="Select user type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="PATIENT">Patient</SelectItem>
-                <SelectItem value="PHARMACY">Pharmacy</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           <Button
