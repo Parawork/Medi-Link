@@ -7,33 +7,118 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Patient {
-  id            String         @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
-  email         String         @unique
+model User {
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  email         String          @unique
   password      String
+  username      String          @unique
   phone         String?
-  address       String?
-  prescriptions Prescription[]
-  orders        Order[]
-  subscriptions Subscription[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  geoLocationId String?        @db.ObjectId
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  role          Role            @default(PATIENT)
+  accounts      Account[]
+  sessions      Session[]
+  authenticator Authenticator[]
 
-  GeoLocation GeoLocation? @relation(fields: [geoLocationId], references: [id])
+  // Profile relations (only one will be populated based on role)
+  patient  Patient?
+  pharmacy Pharmacy?
+}
+
+enum Role {
+  PATIENT
+  PHARMACY
+  ADMIN
+}
+
+// Authentication models (unchanged from your current schema)
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Authenticator {
+  credentialID         String  @id @map("_id")
+  userId               String  @db.ObjectId
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Profile models
+model Patient {
+  id                String         @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String         @unique @db.ObjectId
+  user              User           @relation(fields: [userId], references: [id])
+  fullName          String
+  dateOfBirth       DateTime
+  gender            String?
+  streetAddress     String
+  city              String
+  stateProvince     String
+  postalCode        String
+  country           String
+  medicalConditions String?
+  allergies         String?
+  geoLocation       GeoLocation?   @relation(fields: [geoLocationId], references: [id])
+  geoLocationId     String?        @db.ObjectId
+  subscriptions     Subscription[]
+  prescriptions     Prescription[]
+  orders            Order[]
 }
 
 model Pharmacy {
-  id            String      @id @default(auto()) @map("_id") @db.ObjectId
-  PharmacistId  String      @unique @db.ObjectId
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String       @unique @db.ObjectId
+  user          User         @relation(fields: [userId], references: [id])
   name          String
-  location      GeoLocation @relation(fields: [geoLocationId], references: [id])
+  phone         String
+  streetAddress String
+  city          String
+  stateProvince String
+  postalCode    String
+  country       String
+  geoLocation   GeoLocation? @relation(fields: [geoLocationId], references: [id])
+  geoLocationId String?      @db.ObjectId
   medicines     Medicine[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  geoLocationId String      @db.ObjectId
-  Order         Order[]
+  orders        Order[]
+  licenseNumber String       @unique
+  licenseFile   String?
+  verified      Boolean      @default(false)
 }
 
 model Prescription {

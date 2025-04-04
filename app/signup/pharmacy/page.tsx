@@ -1,14 +1,12 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { useToast } from "@/components/ui/use-toast"
-import { Upload } from "lucide-react"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { Upload } from "lucide-react";
 
 export default function PharmacySignupPage() {
   const [formData, setFormData] = useState({
@@ -24,39 +22,25 @@ export default function PharmacySignupPage() {
     username: "",
     password: "",
     confirmPassword: "",
-  })
-  const [licenseFile, setLicenseFile] = useState<File | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
-  const { toast } = useToast()
-
-  // Load initial signup data if available
-  useEffect(() => {
-    const savedData = localStorage.getItem("signupData")
-    if (savedData) {
-      const { email, fullName } = JSON.parse(savedData)
-      setFormData((prev) => ({
-        ...prev,
-        email: email || "",
-        name: fullName || "",
-        username: email ? email.split("@")[0] : "",
-      }))
-    }
-  }, [])
+  });
+  const [licenseFile, setLicenseFile] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setLicenseFile(e.target.files[0])
+      setLicenseFile(e.target.files[0]);
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     // Validate form
     if (formData.password !== formData.confirmPassword) {
@@ -64,55 +48,86 @@ export default function PharmacySignupPage() {
         title: "Error",
         description: "Passwords do not match.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     if (!licenseFile) {
       toast({
         title: "Error",
-        description: "Please upload your pharmacy license document.",
+        description: "License document is required.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
-      // In a real app, this would be an API call to register the pharmacy
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      const formDataToSend = new FormData();
+
+      // Append all form data
+      Object.entries(formData).forEach(([key, value]) => {
+        formDataToSend.append(key, value);
+      });
+
+      // Append the license file
+      formDataToSend.append("licenseFile", licenseFile);
+      // Explicitly set role
+      formDataToSend.append("role", "PHARMACY");
+
+      const response = await fetch("/api/sign-up/pharmacy", {
+        method: "POST",
+        body: formDataToSend,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create account");
+      }
 
       toast({
         title: "Success",
-        description: "Pharmacy account created successfully!",
-      })
-
-      // Clear signup data
-      localStorage.removeItem("signupData")
+        description:
+          "Pharmacy account created successfully! Awaiting verification.",
+      });
 
       // Redirect to login
-      router.push("/login")
+      router.push("/login");
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to create account. Please try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to create account. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-[#0a2351] flex items-center justify-center p-4">
       <div className="w-full max-w-2xl bg-[#e6eaf2] rounded-3xl p-8 shadow-lg my-8">
-        <h1 className="text-2xl font-bold text-center text-[#0a2351] mb-2">Welcome to Medi-Link</h1>
-        <h2 className="text-lg text-center text-[#0a2351] mb-6">Pharmacy Signup</h2>
+        <h1 className="text-2xl font-bold text-center text-[#0a2351] mb-2">
+          Welcome to Medi-Link
+        </h1>
+        <h2 className="text-lg text-center text-[#0a2351] mb-6">
+          Pharmacy Signup
+        </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6"
+          encType="multipart/form-data"
+        >
           <div className="bg-white p-4 rounded-lg">
-            <h3 className="text-sm font-medium text-[#0a2351] mb-4">Pharmacy Details</h3>
+            <h3 className="text-sm font-medium text-[#0a2351] mb-4">
+              Pharmacy Details
+            </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
@@ -131,7 +146,10 @@ export default function PharmacySignupPage() {
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="licenseNumber" className="block text-xs text-[#0a2351]">
+                <label
+                  htmlFor="licenseNumber"
+                  className="block text-xs text-[#0a2351]"
+                >
                   License Number
                 </label>
                 <Input
@@ -146,7 +164,10 @@ export default function PharmacySignupPage() {
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="streetAddress" className="block text-xs text-[#0a2351]">
+                <label
+                  htmlFor="streetAddress"
+                  className="block text-xs text-[#0a2351]"
+                >
                   Street Address
                 </label>
                 <Input
@@ -176,7 +197,10 @@ export default function PharmacySignupPage() {
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="stateProvince" className="block text-xs text-[#0a2351]">
+                <label
+                  htmlFor="stateProvince"
+                  className="block text-xs text-[#0a2351]"
+                >
                   State/Province
                 </label>
                 <Input
@@ -191,7 +215,10 @@ export default function PharmacySignupPage() {
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="postalCode" className="block text-xs text-[#0a2351]">
+                <label
+                  htmlFor="postalCode"
+                  className="block text-xs text-[#0a2351]"
+                >
                   Postal Code
                 </label>
                 <Input
@@ -206,7 +233,10 @@ export default function PharmacySignupPage() {
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="country" className="block text-xs text-[#0a2351]">
+                <label
+                  htmlFor="country"
+                  className="block text-xs text-[#0a2351]"
+                >
                   Country
                 </label>
                 <Input
@@ -253,10 +283,14 @@ export default function PharmacySignupPage() {
             </div>
 
             <div className="mt-4 space-y-1">
-              <label className="block text-xs text-[#0a2351]">Upload Pharmacy License Document</label>
+              <label className="block text-xs text-[#0a2351]">
+                Upload Pharmacy License Document
+              </label>
               <div
                 className="border border-dashed border-gray-300 rounded-md p-4 text-center cursor-pointer bg-gray-50"
-                onClick={() => document.getElementById("license-upload")?.click()}
+                onClick={() =>
+                  document.getElementById("license-upload")?.click()
+                }
               >
                 <input
                   id="license-upload"
@@ -268,7 +302,9 @@ export default function PharmacySignupPage() {
                 <div className="flex flex-col items-center justify-center">
                   <Upload className="h-10 w-10 text-gray-400 mb-2" />
                   <p className="text-sm text-gray-500">
-                    {licenseFile ? licenseFile.name : "Drag & Drop Files or Browse"}
+                    {licenseFile
+                      ? licenseFile.name
+                      : "Drag & Drop Files or Browse"}
                   </p>
                 </div>
               </div>
@@ -276,11 +312,16 @@ export default function PharmacySignupPage() {
           </div>
 
           <div className="bg-white p-4 rounded-lg">
-            <h3 className="text-sm font-medium text-[#0a2351] mb-4">Account Details</h3>
+            <h3 className="text-sm font-medium text-[#0a2351] mb-4">
+              Account Details
+            </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label htmlFor="username" className="block text-xs text-[#0a2351]">
+                <label
+                  htmlFor="username"
+                  className="block text-xs text-[#0a2351]"
+                >
                   Username
                 </label>
                 <Input
@@ -297,7 +338,10 @@ export default function PharmacySignupPage() {
               <div className="space-y-1 md:col-span-1"></div>
 
               <div className="space-y-1">
-                <label htmlFor="password" className="block text-xs text-[#0a2351]">
+                <label
+                  htmlFor="password"
+                  className="block text-xs text-[#0a2351]"
+                >
                   Password
                 </label>
                 <Input
@@ -313,7 +357,10 @@ export default function PharmacySignupPage() {
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="confirmPassword" className="block text-xs text-[#0a2351]">
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-xs text-[#0a2351]"
+                >
                   Confirm Password
                 </label>
                 <Input
@@ -342,7 +389,10 @@ export default function PharmacySignupPage() {
         <div className="mt-4 text-center">
           <p className="text-sm text-[#0a2351]">
             Already have an account?{" "}
-            <Link href="/login" className="font-medium text-blue-600 hover:underline">
+            <Link
+              href="/login"
+              className="font-medium text-blue-600 hover:underline"
+            >
               Login
             </Link>
           </p>
@@ -359,6 +409,5 @@ export default function PharmacySignupPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

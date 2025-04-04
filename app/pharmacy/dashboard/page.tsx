@@ -1,50 +1,33 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
-import { Search } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import PharmacySidebar from "@/components/pharmacy-sidebar"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import PharmacySidebar from "@/components/pharmacy-sidebar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Order = {
-  id: number
-  name: string
-  date: string
-  avatar: string
-  status: "pending" | "accepted" | "completed"
-}
+  id: number;
+  name: string;
+  date: string;
+  avatar: string;
+  status: "pending" | "accepted" | "completed";
+};
 
 export default function PharmacyDashboard() {
-  const [user, setUser] = useState<any>(null)
-  const [activeTab, setActiveTab] = useState("pending")
-  const router = useRouter()
-
-  useEffect(() => {
-    // Check if user is logged in
-    const userData = localStorage.getItem("user")
-    if (!userData) {
-      router.push("/login")
-      return
-    }
-
-    const parsedUser = JSON.parse(userData)
-    if (parsedUser.type !== "pharmacy") {
-      router.push("/login")
-      return
-    }
-
-    setUser(parsedUser)
-  }, [router])
+  const [user, setUser] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("pending");
+  const router = useRouter();
 
   const handleOrderInfo = (orderId: number) => {
-    router.push(`/pharmacy/orders/${orderId}`)
-  }
+    router.push(`/pharmacy/orders/${orderId}`);
+  };
 
   if (!user) {
-    return null // Loading state
+    return null; // Loading state
   }
 
   return (
@@ -60,7 +43,9 @@ export default function PharmacyDashboard() {
         <main className="flex-1 p-6">
           <div className="max-w-3xl mx-auto">
             <h1 className="text-2xl font-bold mb-1">Welcome to Medi-Link</h1>
-            <p className="text-gray-500 mb-6">Bridging Patients & Pharmacies Efficiently</p>
+            <p className="text-gray-500 mb-6">
+              Bridging Patients & Pharmacies Efficiently
+            </p>
 
             <div className="relative mb-6">
               <div className="flex items-center bg-blue-100 rounded-full p-2 pl-4">
@@ -71,8 +56,8 @@ export default function PharmacyDashboard() {
                     activeTab === "pending"
                       ? "Check Pending Orders"
                       : activeTab === "accepted"
-                        ? "Search Accepted Order"
-                        : "Search Completed Orders"
+                      ? "Search Accepted Order"
+                      : "Search Completed Orders"
                   }
                 />
               </div>
@@ -108,7 +93,10 @@ export default function PharmacyDashboard() {
 
                   <div className="space-y-4">
                     {pendingOrders.map((order) => (
-                      <div key={order.id} className="bg-white rounded-lg border border-gray-200 p-4">
+                      <div
+                        key={order.id}
+                        className="bg-white rounded-lg border border-gray-200 p-4"
+                      >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
                             <div className="w-16 h-16 rounded-full overflow-hidden">
@@ -122,7 +110,9 @@ export default function PharmacyDashboard() {
                             </div>
                             <div>
                               <h3 className="font-medium">{order.name}</h3>
-                              <p className="text-sm text-gray-500">{order.date}</p>
+                              <p className="text-sm text-gray-500">
+                                {order.date}
+                              </p>
                             </div>
                           </div>
                           <div className="flex gap-2">
@@ -134,7 +124,10 @@ export default function PharmacyDashboard() {
                             >
                               Order Info
                             </Button>
-                            <Button size="sm" className="bg-red-500 hover:bg-red-600 text-white rounded-full">
+                            <Button
+                              size="sm"
+                              className="bg-red-500 hover:bg-red-600 text-white rounded-full"
+                            >
                               Pending
                             </Button>
                           </div>
@@ -147,11 +140,16 @@ export default function PharmacyDashboard() {
 
               <TabsContent value="accepted" className="mt-0">
                 <div className="bg-white rounded-lg border border-gray-100 p-6">
-                  <h2 className="text-xl font-semibold mb-4">Accepted Orders</h2>
+                  <h2 className="text-xl font-semibold mb-4">
+                    Accepted Orders
+                  </h2>
 
                   <div className="space-y-4">
                     {acceptedOrders.map((order) => (
-                      <div key={order.id} className="bg-white rounded-lg border border-gray-200 p-4">
+                      <div
+                        key={order.id}
+                        className="bg-white rounded-lg border border-gray-200 p-4"
+                      >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
                             <div className="w-16 h-16 rounded-full overflow-hidden">
@@ -165,7 +163,9 @@ export default function PharmacyDashboard() {
                             </div>
                             <div>
                               <h3 className="font-medium">{order.name}</h3>
-                              <p className="text-sm text-gray-500">{order.date}</p>
+                              <p className="text-sm text-gray-500">
+                                {order.date}
+                              </p>
                             </div>
                           </div>
                           <div className="flex gap-2">
@@ -177,7 +177,10 @@ export default function PharmacyDashboard() {
                             >
                               Order Info
                             </Button>
-                            <Button size="sm" className="bg-amber-500 hover:bg-amber-600 text-white rounded-full">
+                            <Button
+                              size="sm"
+                              className="bg-amber-500 hover:bg-amber-600 text-white rounded-full"
+                            >
                               Accepted
                             </Button>
                           </div>
@@ -190,11 +193,16 @@ export default function PharmacyDashboard() {
 
               <TabsContent value="completed" className="mt-0">
                 <div className="bg-white rounded-lg border border-gray-100 p-6">
-                  <h2 className="text-xl font-semibold mb-4">Completed Orders</h2>
+                  <h2 className="text-xl font-semibold mb-4">
+                    Completed Orders
+                  </h2>
 
                   <div className="space-y-4">
                     {completedOrders.map((order) => (
-                      <div key={order.id} className="bg-white rounded-lg border border-gray-200 p-4">
+                      <div
+                        key={order.id}
+                        className="bg-white rounded-lg border border-gray-200 p-4"
+                      >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
                             <div className="w-16 h-16 rounded-full overflow-hidden">
@@ -208,7 +216,9 @@ export default function PharmacyDashboard() {
                             </div>
                             <div>
                               <h3 className="font-medium">{order.name}</h3>
-                              <p className="text-sm text-gray-500">{order.date}</p>
+                              <p className="text-sm text-gray-500">
+                                {order.date}
+                              </p>
                             </div>
                           </div>
                           <div className="flex gap-2">
@@ -220,7 +230,10 @@ export default function PharmacyDashboard() {
                             >
                               Order Info
                             </Button>
-                            <Button size="sm" className="bg-teal-500 hover:bg-teal-600 text-white rounded-full">
+                            <Button
+                              size="sm"
+                              className="bg-teal-500 hover:bg-teal-600 text-white rounded-full"
+                            >
                               Completed
                             </Button>
                           </div>
@@ -235,7 +248,7 @@ export default function PharmacyDashboard() {
         </main>
       </div>
     </div>
-  )
+  );
 }
 
 const pendingOrders: Order[] = [
@@ -295,7 +308,7 @@ const pendingOrders: Order[] = [
     avatar: "/placeholder.svg?height=64&width=64",
     status: "pending",
   },
-]
+];
 
 const acceptedOrders: Order[] = [
   {
@@ -354,7 +367,7 @@ const acceptedOrders: Order[] = [
     avatar: "/placeholder.svg?height=64&width=64",
     status: "accepted",
   },
-]
+];
 
 const completedOrders: Order[] = [
   {
@@ -413,5 +426,4 @@ const completedOrders: Order[] = [
     avatar: "/placeholder.svg?height=64&width=64",
     status: "completed",
   },
-]
-
+];

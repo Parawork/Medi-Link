@@ -1,77 +1,72 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { useToast } from "@/components/ui/use-toast"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function SignupPage() {
-  const [fullName, setFullName] = useState("")
-  const [email, setEmail] = useState("")
-  const [userType, setUserType] = useState<string | undefined>(undefined)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const router = useRouter()
-  const { toast } = useToast()
+  const [userType, setUserType] = useState<string | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!fullName || !email || !userType) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
       // In a real app, this would store the initial signup data
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Store initial signup data (in a real app, use secure methods)
       localStorage.setItem(
         "signupData",
         JSON.stringify({
-          fullName,
-          email,
           userType,
-        }),
-      )
+        })
+      );
 
       // Redirect to appropriate signup form
       if (userType === "pharmacy") {
-        router.push("/signup/pharmacy")
+        router.push("/signup/pharmacy");
       } else {
-        router.push("/signup/customer")
+        router.push("/signup/customer");
       }
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to proceed. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-[#0a2351] flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-3xl p-8 shadow-lg">
-        <h1 className="text-2xl font-bold text-center text-[#0a2351] mb-8">Welcome to Medi-Link</h1>
+        <h1 className="text-2xl font-bold text-center text-[#0a2351] mb-8">
+          Welcome to Medi-Link
+        </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <label htmlFor="fullName" className="block text-sm font-medium text-[#0a2351]">
+            {/* <label htmlFor="fullName" className="block text-sm font-medium text-[#0a2351]">
               Full Name
             </label>
             <Input
@@ -97,15 +92,21 @@ export default function SignupPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full p-3 border border-gray-300 rounded-md"
-            />
+            /> */}
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="userType" className="block text-sm font-medium text-[#0a2351]">
+            <label
+              htmlFor="userType"
+              className="block text-sm font-medium text-[#0a2351]"
+            >
               User Type
             </label>
             <Select onValueChange={setUserType}>
-              <SelectTrigger id="userType" className="w-full p-3 border border-gray-300 rounded-md">
+              <SelectTrigger
+                id="userType"
+                className="w-full p-3 border border-gray-300 rounded-md"
+              >
                 <SelectValue placeholder="Select user type" />
               </SelectTrigger>
               <SelectContent>
@@ -144,7 +145,10 @@ export default function SignupPage() {
         <div className="mt-6 text-center">
           <p className="text-sm text-[#0a2351]">
             Already have an account?{" "}
-            <Link href="/login" className="font-medium text-blue-600 hover:underline">
+            <Link
+              href="/login"
+              className="font-medium text-blue-600 hover:underline"
+            >
               Login
             </Link>
           </p>
@@ -161,6 +165,5 @@ export default function SignupPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-
