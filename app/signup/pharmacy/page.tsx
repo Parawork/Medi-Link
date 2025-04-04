@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -68,15 +67,31 @@ export default function PharmacySignupPage() {
       return;
     }
 
+    if (!licenseFile) {
+      toast({
+        title: "Error",
+        description: "License document is required.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/sign-up/customer", {
+      const formDataToSend = new FormData();
+
+      // Append all form data
+      Object.entries(formData).forEach(([key, value]) => {
+        formDataToSend.append(key, value);
+      });
+
+      // Append the license file
+      formDataToSend.append("licenseFile", licenseFile);
+
+      const response = await fetch("/api/sign-up/pharmacy", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+        body: formDataToSend, // No Content-Type header needed for FormData
       });
 
       const data = await response.json();
@@ -87,7 +102,8 @@ export default function PharmacySignupPage() {
 
       toast({
         title: "Success",
-        description: "Customer account created successfully!",
+        description:
+          "Pharmacy account created successfully! Awaiting verification.",
       });
 
       // Clear signup data
@@ -119,7 +135,11 @@ export default function PharmacySignupPage() {
           Pharmacy Signup
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6"
+          encType="multipart/form-data"
+        >
           <div className="bg-white p-4 rounded-lg">
             <h3 className="text-sm font-medium text-[#0a2351] mb-4">
               Pharmacy Details

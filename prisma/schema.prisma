@@ -35,15 +35,27 @@ model Patient {
 }
 
 model Pharmacy {
-  id            String      @id @default(auto()) @map("_id") @db.ObjectId
-  PharmacistId  String      @unique @db.ObjectId
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
   name          String
-  location      GeoLocation @relation(fields: [geoLocationId], references: [id])
+  email         String       @unique
+  password      String
+  phone         String
+  streetAddress String
+  city          String
+  stateProvince String
+  postalCode    String
+  country       String
+  username      String       @unique
+  location      GeoLocation? @relation(fields: [geoLocationId], references: [id])
   medicines     Medicine[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  geoLocationId String      @db.ObjectId
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  geoLocationId String?      @db.ObjectId
   Order         Order[]
+
+  licenseNumber String   @unique
+  licenseFile   String? // Path to uploaded license file
+  verified      Boolean? @default(false)
 }
 
 model Prescription {
