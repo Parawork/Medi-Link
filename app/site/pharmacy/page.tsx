@@ -2,7 +2,7 @@ import { signOut } from "@/lib/auth";
 import { requireUser } from "@/lib/requireUser";
 
 export default async function PharmacyDashboard() {
-  const user = await requireUser("PHARMACY"); // Note: You're requiring PHARMACY role but component is named PatientDashboard
+  const user = await requireUser("PHARMACY");
 
   return (
     <div className="p-4">

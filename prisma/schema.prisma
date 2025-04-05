@@ -102,9 +102,9 @@ model Patient {
 }
 
 model Pharmacy {
-  id            String       @id @default(auto()) @map("_id") @db.ObjectId
-  userId        String       @unique @db.ObjectId
-  user          User         @relation(fields: [userId], references: [id])
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String         @unique @db.ObjectId
+  user          User           @relation(fields: [userId], references: [id])
   name          String
   phone         String
   streetAddress String
@@ -112,21 +112,24 @@ model Pharmacy {
   stateProvince String
   postalCode    String
   country       String
-  geoLocation   GeoLocation? @relation(fields: [geoLocationId], references: [id])
-  geoLocationId String?      @db.ObjectId
+  geoLocation   GeoLocation?   @relation(fields: [geoLocationId], references: [id])
+  geoLocationId String?        @db.ObjectId
   orders        Order[]
-  licenseNumber String       @unique
+  licenseNumber String         @unique
   licenseFile   String?
-  verified      Boolean      @default(false)
+  verified      Boolean        @default(false)
+  Prescription  Prescription[]
 }
 
 model Prescription {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  PharmacistId String   @db.ObjectId
-  Patient      Patient  @relation(fields: [PharmacistId], references: [id])
-  fileUrl      String // URL to the uploaded prescription image/file
-  createdAt    DateTime @default(now())
-  Order        Order[]
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  patientId  String   @db.ObjectId
+  patient    Patient  @relation(fields: [patientId], references: [id])
+  fileUrl    String // URL to the uploaded prescription image/file
+  createdAt  DateTime @default(now())
+  pharmacyId String   @db.ObjectId
+  pharmacy   Pharmacy @relation(fields: [pharmacyId], references: [id])
+  Order      Order[]
 }
 
 model Order {

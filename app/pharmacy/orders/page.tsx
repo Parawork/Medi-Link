@@ -1,46 +1,25 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
-import { Search, Filter } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import PharmacySidebar from "@/components/pharmacy-sidebar"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { Search, Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import PharmacySidebar from "@/components/pharmacy-sidebar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Order = {
-  id: number
-  name: string
-  date: string
-  avatar: string
-  status: "pending" | "accepted" | "completed"
-}
+  id: number;
+  name: string;
+  date: string;
+  avatar: string;
+  status: "pending" | "accepted" | "completed";
+};
 
 export default function PharmacyOrdersPage() {
-  const [user, setUser] = useState<any>(null)
-  const router = useRouter()
-
-  useEffect(() => {
-    // Check if user is logged in
-    const userData = localStorage.getItem("user")
-    if (!userData) {
-      router.push("/login")
-      return
-    }
-
-    const parsedUser = JSON.parse(userData)
-    if (parsedUser.type !== "pharmacy") {
-      router.push("/login")
-      return
-    }
-
-    setUser(parsedUser)
-  }, [router])
-
-  if (!user) {
-    return null // Loading state
-  }
+  const [user, setUser] = useState<any>(null);
+  const router = useRouter();
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -100,53 +79,67 @@ export default function PharmacyOrdersPage() {
               </TabsList>
 
               <TabsContent value="all" className="space-y-4">
-                {[...pendingOrders, ...acceptedOrders, ...completedOrders].map((order) => (
-                  <div key={order.id} className="bg-white rounded-lg border border-gray-200 p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-full overflow-hidden">
-                          <Image
-                            src={order.avatar || "/placeholder.svg"}
-                            alt={order.name}
-                            width={64}
-                            height={64}
-                            className="object-cover"
-                          />
+                {[...pendingOrders, ...acceptedOrders, ...completedOrders].map(
+                  (order) => (
+                    <div
+                      key={order.id}
+                      className="bg-white rounded-lg border border-gray-200 p-4"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-16 h-16 rounded-full overflow-hidden">
+                            <Image
+                              src={order.avatar || "/placeholder.svg"}
+                              alt={order.name}
+                              width={64}
+                              height={64}
+                              className="object-cover"
+                            />
+                          </div>
+                          <div>
+                            <h3 className="font-medium">{order.name}</h3>
+                            <p className="text-sm text-gray-500">
+                              {order.date}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-medium">{order.name}</h3>
-                          <p className="text-sm text-gray-500">{order.date}</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="text-gray-600 border-gray-300 rounded-full">
-                          Order Info
-                        </Button>
-                        <Button
-                          size="sm"
-                          className={`${
-                            order.status === "pending"
-                              ? "bg-red-500 hover:bg-red-600"
-                              : order.status === "accepted"
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-gray-600 border-gray-300 rounded-full"
+                          >
+                            Order Info
+                          </Button>
+                          <Button
+                            size="sm"
+                            className={`${
+                              order.status === "pending"
+                                ? "bg-red-500 hover:bg-red-600"
+                                : order.status === "accepted"
                                 ? "bg-amber-500 hover:bg-amber-600"
                                 : "bg-teal-500 hover:bg-teal-600"
-                          } text-white rounded-full`}
-                        >
-                          {order.status === "pending"
-                            ? "Pending"
-                            : order.status === "accepted"
+                            } text-white rounded-full`}
+                          >
+                            {order.status === "pending"
+                              ? "Pending"
+                              : order.status === "accepted"
                               ? "Accepted"
                               : "Completed"}
-                        </Button>
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                )}
               </TabsContent>
 
               <TabsContent value="pending" className="space-y-4">
                 {pendingOrders.map((order) => (
-                  <div key={order.id} className="bg-white rounded-lg border border-gray-200 p-4">
+                  <div
+                    key={order.id}
+                    className="bg-white rounded-lg border border-gray-200 p-4"
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className="w-16 h-16 rounded-full overflow-hidden">
@@ -164,10 +157,17 @@ export default function PharmacyOrdersPage() {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="text-gray-600 border-gray-300 rounded-full">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-gray-600 border-gray-300 rounded-full"
+                        >
                           Order Info
                         </Button>
-                        <Button size="sm" className="bg-red-500 hover:bg-red-600 text-white rounded-full">
+                        <Button
+                          size="sm"
+                          className="bg-red-500 hover:bg-red-600 text-white rounded-full"
+                        >
                           Pending
                         </Button>
                       </div>
@@ -178,7 +178,10 @@ export default function PharmacyOrdersPage() {
 
               <TabsContent value="accepted" className="space-y-4">
                 {acceptedOrders.map((order) => (
-                  <div key={order.id} className="bg-white rounded-lg border border-gray-200 p-4">
+                  <div
+                    key={order.id}
+                    className="bg-white rounded-lg border border-gray-200 p-4"
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className="w-16 h-16 rounded-full overflow-hidden">
@@ -196,10 +199,17 @@ export default function PharmacyOrdersPage() {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="text-gray-600 border-gray-300 rounded-full">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-gray-600 border-gray-300 rounded-full"
+                        >
                           Order Info
                         </Button>
-                        <Button size="sm" className="bg-amber-500 hover:bg-amber-600 text-white rounded-full">
+                        <Button
+                          size="sm"
+                          className="bg-amber-500 hover:bg-amber-600 text-white rounded-full"
+                        >
                           Accepted
                         </Button>
                       </div>
@@ -210,7 +220,10 @@ export default function PharmacyOrdersPage() {
 
               <TabsContent value="completed" className="space-y-4">
                 {completedOrders.map((order) => (
-                  <div key={order.id} className="bg-white rounded-lg border border-gray-200 p-4">
+                  <div
+                    key={order.id}
+                    className="bg-white rounded-lg border border-gray-200 p-4"
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className="w-16 h-16 rounded-full overflow-hidden">
@@ -228,10 +241,17 @@ export default function PharmacyOrdersPage() {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="text-gray-600 border-gray-300 rounded-full">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-gray-600 border-gray-300 rounded-full"
+                        >
                           Order Info
                         </Button>
-                        <Button size="sm" className="bg-teal-500 hover:bg-teal-600 text-white rounded-full">
+                        <Button
+                          size="sm"
+                          className="bg-teal-500 hover:bg-teal-600 text-white rounded-full"
+                        >
                           Completed
                         </Button>
                       </div>
@@ -244,7 +264,7 @@ export default function PharmacyOrdersPage() {
         </main>
       </div>
     </div>
-  )
+  );
 }
 
 const pendingOrders: Order[] = [
@@ -262,7 +282,7 @@ const pendingOrders: Order[] = [
     avatar: "/placeholder.svg?height=64&width=64",
     status: "pending",
   },
-]
+];
 
 const acceptedOrders: Order[] = [
   {
@@ -279,7 +299,7 @@ const acceptedOrders: Order[] = [
     avatar: "/placeholder.svg?height=64&width=64",
     status: "accepted",
   },
-]
+];
 
 const completedOrders: Order[] = [
   {
@@ -296,5 +316,4 @@ const completedOrders: Order[] = [
     avatar: "/placeholder.svg?height=64&width=64",
     status: "completed",
   },
-]
-
+];
