@@ -50,9 +50,7 @@ export default function LoginPage() {
 
       // Redirect based on the role from session
       router.push(
-        session.user.role === "PHARMACY"
-          ? "/dashboardNew/pharmacy"
-          : "/dashboardNew/patient"
+        session.user.role === "PHARMACY" ? "/site/pharmacy" : "/site/patient"
       );
     } catch (error) {
       toast({
