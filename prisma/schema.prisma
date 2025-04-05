@@ -114,7 +114,6 @@ model Pharmacy {
   country       String
   geoLocation   GeoLocation? @relation(fields: [geoLocationId], references: [id])
   geoLocationId String?      @db.ObjectId
-  medicines     Medicine[]
   orders        Order[]
   licenseNumber String       @unique
   licenseFile   String?
@@ -127,42 +126,32 @@ model Prescription {
   Patient      Patient  @relation(fields: [PharmacistId], references: [id])
   fileUrl      String // URL to the uploaded prescription image/file
   createdAt    DateTime @default(now())
-}
-
-model Medicine {
-  id            String          @id @default(auto()) @map("_id") @db.ObjectId
-  pharmacyId    String          @db.ObjectId
-  pharmacy      Pharmacy        @relation(fields: [pharmacyId], references: [id])
-  name          String
-  price         Float
-  stock         Int
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  OrderMedicine OrderMedicine[]
-  Subscription  Subscription[]
+  Order        Order[]
 }
 
 model Order {
-  id           String          @id @default(auto()) @map("_id") @db.ObjectId
-  PharmacistId String          @db.ObjectId
-  Patient      Patient         @relation(fields: [PharmacistId], references: [id])
-  pharmacyId   String          @db.ObjectId
-  pharmacy     Pharmacy        @relation(fields: [pharmacyId], references: [id])
-  medicines    OrderMedicine[]
-  totalAmount  Float
-  payment      Payment?
-  delivery     Delivery?
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  pharmacyId     String       @db.ObjectId
+  pharmacy       Pharmacy     @relation(fields: [pharmacyId], references: [id])
+  items          OrderItem[]
+  totalAmount    Float
+  payment        Payment?
+  delivery       Delivery?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  Patient        Patient?     @relation(fields: [patientId], references: [id])
+  patientId      String?      @db.ObjectId
+  prescriptionId String       @db.ObjectId
+  prescription   Prescription @relation(fields: [prescriptionId], references: [id])
 }
 
-model OrderMedicine {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  orderId    String   @db.ObjectId
-  order      Order    @relation(fields: [orderId], references: [id])
-  medicineId String   @db.ObjectId
-  medicine   Medicine @relation(fields: [medicineId], references: [id])
-  quantity   Int
+model OrderItem {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  orderId  String @db.ObjectId
+  order    Order  @relation(fields: [orderId], references: [id])
+  name     String
+  price    Float
+  quantity Int
 }
 
 model Payment {
@@ -177,9 +166,7 @@ model Subscription {
   id           String   @id @default(auto()) @map("_id") @db.ObjectId
   PharmacistId String   @db.ObjectId
   Patient      Patient  @relation(fields: [PharmacistId], references: [id])
-  medicineId   String   @db.ObjectId
-  medicine     Medicine @relation(fields: [medicineId], references: [id])
-  frequency    Int // Days between each delivery
+  frequency    Int
   nextDelivery DateTime
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

@@ -6,11 +6,11 @@ import { requireUser } from "./lib/requireUser";
 // Define the protected routes and their allowed roles
 const protectedRoutes = [
   {
-    path: "/dashboardNew/patient",
+    path: "/site/patient",
     roles: ["PATIENT"],
   },
   {
-    path: "/dashboardNew/pharmacy",
+    path: "/site/pharmacy",
     roles: ["PHARMACY"],
   },
   {
