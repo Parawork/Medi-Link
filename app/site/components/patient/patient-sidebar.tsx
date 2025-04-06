@@ -70,6 +70,7 @@ export default function Sidebar() {
           collapsed={collapsed}
         />
 
+
         <NavItem
           href="/site/patient/order-history"
           icon={<Clock size={18} />}

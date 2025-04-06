@@ -1,3 +1,4 @@
+
 import { prisma } from "@/app/utils/db";
 import { requireUser } from "@/lib/requireUser";
 import { format } from "date-fns";
@@ -14,8 +15,11 @@ const formatDate = (date: Date) => {
   });
 };
 
+
 export default async function PharmacyDashboard() {
+
   const user = await requireUser("PHARMACY");
+
 
   const orders = await prisma.order.findMany({
     where: {
@@ -121,5 +125,7 @@ export default async function PharmacyDashboard() {
         </div>
       </div>
     </div>
+
   );
 }
+
