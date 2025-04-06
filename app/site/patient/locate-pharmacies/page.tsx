@@ -11,6 +11,10 @@ const MapComponent = dynamic(
   { ssr: false } // This prevents server-side rendering
 );
 
+// Define interfaces
+
+
+
 export default function Page() {
   const [coordinates, setCoordinates] = useState<{
     latitude: number | null;

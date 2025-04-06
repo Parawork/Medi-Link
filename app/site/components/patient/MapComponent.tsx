@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import Link from "next/link";
@@ -37,64 +37,64 @@ const randomAvailability = () => {
 };
 
 // Sample pharmacy data with random availability
-const SAMPLE_PHARMACIES: Omit<Pharmacy, "distance">[] = [
-  {
-    id: "1",
-    name: "City Pharmacy",
-    geoLocation: { latitude: 0, longitude: 0 },
-    streetAddress: "123 Main St",
-    city: "Downtown",
-    stateProvince: "",
-    postalCode: "",
-    country: "",
-    phone: "+1 (555) 123-4567",
-    availability: randomAvailability(),
-    openHours: "8:00 AM - 10:00 PM",
-    verified: true,
-  },
-  {
-    id: "2",
-    name: "Health Plus",
-    geoLocation: { latitude: 0, longitude: 0 },
-    streetAddress: "456 Oak Ave",
-    city: "Westside",
-    stateProvince: "",
-    postalCode: "",
-    country: "",
-    phone: "+1 (555) 987-6543",
-    availability: randomAvailability(),
-    openHours: "24 hours",
-    verified: true,
-  },
-  {
-    id: "3",
-    name: "MediCare",
-    geoLocation: { latitude: 0, longitude: 0 },
-    streetAddress: "789 Pine Rd",
-    city: "Northside",
-    stateProvince: "",
-    postalCode: "",
-    country: "",
-    phone: "+1 (555) 456-7890",
-    availability: randomAvailability(),
-    openHours: "9:00 AM - 9:00 PM",
-    verified: true,
-  },
-  {
-    id: "4",
-    name: "QuickRx Pharmacy",
-    geoLocation: { latitude: 0, longitude: 0 },
-    streetAddress: "321 Maple Dr",
-    city: "Eastside",
-    stateProvince: "",
-    postalCode: "",
-    country: "",
-    phone: "+1 (555) 234-5678",
-    availability: randomAvailability(),
-    openHours: "7:00 AM - 8:00 PM",
-    verified: true,
-  },
-];
+// const SAMPLE_PHARMACIES: Omit<Pharmacy, "distance">[] = [
+//   {
+//     id: "1",
+//     name: "City Pharmacy",
+//     geoLocation: { latitude: 0, longitude: 0 },
+//     streetAddress: "123 Main St",
+//     city: "Downtown",
+//     stateProvince: "",
+//     postalCode: "",
+//     country: "",
+//     phone: "+1 (555) 123-4567",
+//     availability: randomAvailability(),
+//     openHours: "8:00 AM - 10:00 PM",
+//     verified: true,
+//   },
+//   {
+//     id: "2",
+//     name: "Health Plus",
+//     geoLocation: { latitude: 0, longitude: 0 },
+//     streetAddress: "456 Oak Ave",
+//     city: "Westside",
+//     stateProvince: "",
+//     postalCode: "",
+//     country: "",
+//     phone: "+1 (555) 987-6543",
+//     availability: randomAvailability(),
+//     openHours: "24 hours",
+//     verified: true,
+//   },
+//   {
+//     id: "3",
+//     name: "MediCare",
+//     geoLocation: { latitude: 0, longitude: 0 },
+//     streetAddress: "789 Pine Rd",
+//     city: "Northside",
+//     stateProvince: "",
+//     postalCode: "",
+//     country: "",
+//     phone: "+1 (555) 456-7890",
+//     availability: randomAvailability(),
+//     openHours: "9:00 AM - 9:00 PM",
+//     verified: true,
+//   },
+//   {
+//     id: "4",
+//     name: "QuickRx Pharmacy",
+//     geoLocation: { latitude: 0, longitude: 0 },
+//     streetAddress: "321 Maple Dr",
+//     city: "Eastside",
+//     stateProvince: "",
+//     postalCode: "",
+//     country: "",
+//     phone: "+1 (555) 234-5678",
+//     availability: randomAvailability(),
+//     openHours: "7:00 AM - 8:00 PM",
+//     verified: true,
+//   },
+// ];
 
 // Helper functions
 const calculateDistance = (
@@ -116,10 +116,35 @@ const calculateDistance = (
   return R * c; // Distance in km
 };
 
+// Format distance with improved readability
 const formatDistance = (distance: number): string => {
-  return distance < 1
-    ? `${Math.round(distance * 1000)} m`
-    : `${distance.toFixed(1)} km`;
+  if (distance < 1) {
+    // Less than 1km, show in meters with more precision
+    return `${Math.round(distance * 1000)} m`;
+  } else if (distance < 10) {
+    // Medium distances with 1 decimal place
+    return `${distance.toFixed(1)} km`;
+  } else {
+    // Longer distances with no decimal places
+    return `${Math.round(distance)} km`;
+  }
+};
+
+// Add estimated travel time based on distance
+const estimateTravelTime = (distance: number): string => {
+  // Walking speed ~5 km/h
+  const walkingMinutes = Math.round((distance / 5) * 60);
+
+  // Driving speed ~30 km/h in urban areas
+  const drivingMinutes = Math.round((distance / 30) * 60);
+
+  if (distance < 1) {
+    return `~${walkingMinutes} min walk`;
+  } else if (distance < 3) {
+    return `~${walkingMinutes} min walk or ${drivingMinutes} min drive`;
+  } else {
+    return `~${drivingMinutes} min drive`;
+  }
 };
 
 // Get color for availability badge
@@ -141,6 +166,31 @@ const formatAddress = (pharmacy: Pharmacy): string => {
   return `${pharmacy.streetAddress}, ${pharmacy.city}, ${pharmacy.stateProvince}, ${pharmacy.postalCode}, ${pharmacy.country}`;
 };
 
+// Add this mapping to handle different availability formats
+const normalizeAvailability = (availability: any): string => {
+  if (!availability) return randomAvailability();
+
+  // If it's already a string value
+  if (typeof availability === "string") {
+    if (["High", "Medium", "Low"].includes(availability)) {
+      return availability;
+    }
+    // Parse other string formats
+    if (availability.toLowerCase().includes("high")) return "High";
+    if (availability.toLowerCase().includes("medium")) return "Medium";
+    if (availability.toLowerCase().includes("low")) return "Low";
+  }
+
+  // If it's an array (from Prisma schema), use the first one or generate
+  if (Array.isArray(availability) && availability.length > 0) {
+    const status = availability[0].status;
+    if (status) return status;
+  }
+
+  // Default to random
+  return randomAvailability();
+};
+
 const MapComponent: React.FC<MapComponentProps> = ({
   latitude,
   longitude,
@@ -154,22 +204,231 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [filterOpen, setFilterOpen] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const hasLoadedPharmacies = useRef(false);
 
+  // Load pharmacies only once
   useEffect(() => {
+    if (!latitude || !longitude || hasLoadedPharmacies.current) return;
+
     async function fetchPharmacies() {
       try {
-        const res = await fetch("/api/pharmacy"); // adjust to your API route
+        const res = await fetch("/api/pharmacy");
         const data = await res.json();
-        setPharmacies(data);
+
+        if (data && data.length > 0) {
+          // Transform API data to ensure it has all required fields
+          const processedData = data.map((pharmacy: any) => ({
+            ...pharmacy,
+            availability: pharmacy.availability || randomAvailability(),
+            openHours: pharmacy.openHours || "9:00 AM - 6:00 PM",
+            geoLocation: pharmacy.geoLocation || {
+              latitude: latitude + (Math.random() - 0.5) * 0.05,
+              longitude: longitude + (Math.random() - 0.5) * 0.05,
+            },
+          }));
+
+          const pharmaciesWithDistances = addDistancesToPharmacies(
+            processedData,
+            latitude,
+            longitude
+          );
+          setPharmacies(pharmaciesWithDistances);
+        } else {
+          // Create sample data if API returns empty
+          createSamplePharmacies();
+        }
       } catch (error) {
         console.error("Failed to fetch pharmacies:", error);
+        // Create sample data if API fails
+        createSamplePharmacies();
       } finally {
         setLoading(false);
+        hasLoadedPharmacies.current = true;
       }
     }
 
     fetchPharmacies();
-  }, []);
+  }, [latitude, longitude]);
+
+  // Function to add distances to pharmacies
+  const addDistancesToPharmacies = (
+    pharmacyList: Pharmacy[],
+    userLat: number,
+    userLng: number
+  ) => {
+    return pharmacyList
+      .map((pharmacy) => {
+        const pharmacyLat =
+          pharmacy.geoLocation?.latitude ||
+          userLat + (Math.random() - 0.5) * 0.05;
+        const pharmacyLng =
+          pharmacy.geoLocation?.longitude ||
+          userLng + (Math.random() - 0.5) * 0.05;
+
+        const distance = calculateDistance(
+          userLat,
+          userLng,
+          pharmacyLat,
+          pharmacyLng
+        );
+
+        return {
+          ...pharmacy,
+          geoLocation: {
+            latitude: pharmacyLat,
+            longitude: pharmacyLng,
+          },
+          distance: formatDistance(distance),
+        };
+      })
+      .sort((a, b) => {
+        const distA = parseDistanceValue(a.distance || "0 km");
+        const distB = parseDistanceValue(b.distance || "0 km");
+        return distA - distB;
+      });
+  };
+
+  // Function to create sample pharmacy data
+  function createSamplePharmacies() {
+    if (!latitude || !longitude) return;
+
+    // Helper to create a random point at a specific distance
+    const createPointAtDistance = (distance: number) => {
+      const angle = Math.random() * 2 * Math.PI;
+      const latOffset = (distance / 111) * Math.cos(angle);
+      const lngOffset =
+        (distance / (111 * Math.cos(latitude * (Math.PI / 180)))) *
+        Math.sin(angle);
+
+      return {
+        latitude: latitude + latOffset,
+        longitude: longitude + lngOffset,
+      };
+    };
+
+    const samplePharmacies = [
+      {
+        id: "1",
+        name: "City Pharmacy",
+        streetAddress: "123 Main St",
+        city: "Downtown",
+        stateProvince: "",
+        postalCode: "",
+        country: "",
+        phone: "+1 (555) 123-4567",
+        availability: randomAvailability(),
+        openHours: "8:00 AM - 10:00 PM",
+        verified: true,
+        geoLocation: createPointAtDistance(0.5), // Very close (0.5 km)
+      },
+      {
+        id: "2",
+        name: "Health Plus",
+        streetAddress: "456 Oak Ave",
+        city: "Westside",
+        stateProvince: "",
+        postalCode: "",
+        country: "",
+        phone: "+1 (555) 987-6543",
+        availability: randomAvailability(),
+        openHours: "24 hours",
+        verified: true,
+        geoLocation: createPointAtDistance(1.8), // Medium distance (1.8 km)
+      },
+      {
+        id: "3",
+        name: "MediCare",
+        streetAddress: "789 Pine Rd",
+        city: "Northside",
+        stateProvince: "",
+        postalCode: "",
+        country: "",
+        phone: "+1 (555) 456-7890",
+        availability: randomAvailability(),
+        openHours: "9:00 AM - 9:00 PM",
+        verified: true,
+        geoLocation: createPointAtDistance(3.5), // Further away (3.5 km)
+      },
+      {
+        id: "4",
+        name: "QuickRx Pharmacy",
+        streetAddress: "321 Maple Dr",
+        city: "Eastside",
+        stateProvince: "",
+        postalCode: "",
+        country: "",
+        phone: "+1 (555) 234-5678",
+        availability: randomAvailability(),
+        openHours: "7:00 AM - 8:00 PM",
+        verified: true,
+        geoLocation: createPointAtDistance(5.2), // Quite far (5.2 km)
+      },
+      {
+        id: "5",
+        name: "Community Drugs",
+        streetAddress: "555 Elm St",
+        city: "Southside",
+        stateProvince: "",
+        postalCode: "",
+        country: "",
+        phone: "+1 (555) 765-4321",
+        availability: randomAvailability(),
+        openHours: "8:30 AM - 7:00 PM",
+        verified: true,
+        geoLocation: createPointAtDistance(2.3), // Moderate distance (2.3 km)
+      },
+      {
+        id: "6",
+        name: "Metro Pharmacy",
+        streetAddress: "789 Central Ave",
+        city: "Midtown",
+        stateProvince: "",
+        postalCode: "",
+        country: "",
+        phone: "+1 (555) 321-9876",
+        availability: randomAvailability(),
+        openHours: "9:00 AM - 8:00 PM",
+        verified: true,
+        geoLocation: createPointAtDistance(7.8), // Far away (7.8 km)
+      },
+      {
+        id: "7",
+        name: "Neighborhood Pharmacy",
+        streetAddress: "123 Residential Blvd",
+        city: "Suburb",
+        stateProvince: "",
+        postalCode: "",
+        country: "",
+        phone: "+1 (555) 444-3333",
+        availability: randomAvailability(),
+        openHours: "8:00 AM - 6:00 PM",
+        verified: true,
+        geoLocation: createPointAtDistance(10.5), // Very far (10.5 km)
+      },
+      {
+        id: "8",
+        name: "University Medical Supply",
+        streetAddress: "456 Campus Dr",
+        city: "College Area",
+        stateProvince: "",
+        postalCode: "",
+        country: "",
+        phone: "+1 (555) 222-1111",
+        availability: randomAvailability(),
+        openHours: "7:30 AM - 9:00 PM",
+        verified: true,
+        geoLocation: createPointAtDistance(0.8), // Close (0.8 km)
+      },
+    ];
+
+    const pharmaciesWithDistances = addDistancesToPharmacies(
+      samplePharmacies,
+      latitude,
+      longitude
+    );
+    setPharmacies(pharmaciesWithDistances);
+  }
 
   // Filtered pharmacies based on search
   const filteredPharmacies = pharmacies.filter(
@@ -178,87 +437,189 @@ const MapComponent: React.FC<MapComponentProps> = ({
       formatAddress(pharmacy).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Initialize map
+  useEffect(() => {
+    if (!mapRef.current || !latitude || !longitude) return;
+
+    // Workaround for SSR and Leaflet compatibility
+    if (typeof window !== "undefined") {
+      // Create map instance
+      const map = L.map(mapRef.current, {
+        zoomControl: false,
+      }).setView([latitude, longitude], size);
+
+      setMapInstance(map);
+
+      // Add tile layer
+      L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+        {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        }
+      ).addTo(map);
+
+      // Add zoom controls
+      L.control.zoom({ position: "bottomright" }).addTo(map);
+
+      // Add user marker
+      const userIcon = L.divIcon({
+        html: `<div class="user-marker"><div class="pulse"></div></div>`,
+        className: "user-location",
+        iconSize: [20, 20],
+      });
+
+      const userMarker = L.marker([latitude, longitude], { icon: userIcon })
+        .addTo(map)
+        .bindPopup("<b>Your Location</b>");
+
+      (userMarker as any)._isUserMarker = true;
+      userMarker.openPopup();
+
+      // Add styles
+      const style = document.createElement("style");
+      style.innerHTML = `
+        .user-marker {
+          background-color: #4285F4;
+          border-radius: 50%;
+          height: 16px;
+          width: 16px;
+          position: relative;
+          box-shadow: 0 0 0 2px white;
+        }
+        .pulse {
+          background-color: rgba(66, 133, 244, 0.3);
+          border-radius: 50%;
+          height: 30px;
+          width: 30px;
+          position: absolute;
+          top: -7px;
+          left: -7px;
+          animation: pulse 2s infinite;
+        }
+        .pharmacy-marker {
+          font-size: 22px;
+          text-align: center;
+          width: 36px;
+          height: 36px;
+          line-height: 36px;
+          background-color: white;
+          border-radius: 50%;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        @keyframes pulse {
+          0% { transform: scale(0.8); opacity: 0.8; }
+          70% { transform: scale(1.5); opacity: 0; }
+          100% { transform: scale(0.8); opacity: 0; }
+        }
+        /* Custom popup styles */
+        .leaflet-popup-content-wrapper {
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .leaflet-popup-content {
+          margin: 10px 14px;
+          line-height: 1.5;
+        }
+        .leaflet-container a.leaflet-popup-close-button {
+          color: #666;
+          padding: 8px 10px 0 0;
+        }
+        /* Zoom control */
+        .leaflet-control-zoom {
+          border: none !important;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
+        }
+        .leaflet-control-zoom a {
+          background-color: white !important;
+          color: #333 !important;
+        }
+      `;
+      document.head.appendChild(style);
+
+      // Add pharmacy markers
+      if (pharmacies.length > 0) {
+        addPharmacyMarkers(map);
+      }
+
+      // Cleanup
+      return () => {
+        map.remove();
+        document.head.removeChild(style);
+        setMapInstance(null);
+      };
+    }
+  }, [latitude, longitude, size]);
+
+  // Function to add pharmacy markers to map
+  const addPharmacyMarkers = useCallback(
+    (map: L.Map) => {
+      if (!map || pharmacies.length === 0) return;
+
+      // Clear existing markers
+      map.eachLayer((layer) => {
+        if (layer instanceof L.Marker && !(layer as any)._isUserMarker) {
+          map.removeLayer(layer);
+        }
+      });
+
+      // Add new markers
+      pharmacies.forEach((pharmacy) => {
+        const pharmacyIcon = L.divIcon({
+          html: `<div class="pharmacy-marker">💊</div>`,
+          className: "pharmacy-icon",
+          iconSize: [36, 36],
+        });
+
+        const lat = pharmacy.geoLocation?.latitude ?? latitude;
+        const lng = pharmacy.geoLocation?.longitude ?? longitude;
+
+        L.marker([lat, lng], { icon: pharmacyIcon })
+          .addTo(map)
+          .bindPopup(
+            `
+          <div style="font-family: system-ui, sans-serif;">
+            <div style="font-weight: 600; font-size: 16px; margin-bottom: 4px;">${
+              pharmacy.name
+            }</div>
+            <div style="font-size: 13px; color: #666; margin-bottom: 6px;">${formatAddress(
+              pharmacy
+            )}</div>
+            <div style="font-size: 13px; color: #4285F4; font-weight: 500;">${
+              pharmacy.distance
+            } away</div>
+          </div>
+        `
+          )
+          .on("click", () => {
+            setSelectedPharmacy(pharmacy);
+          });
+      });
+    },
+    [pharmacies, latitude, longitude]
+  );
+
+  // Update markers when pharmacies change
+  useEffect(() => {
+    if (mapInstance && pharmacies.length > 0) {
+      addPharmacyMarkers(mapInstance);
+    }
+  }, [mapInstance, pharmacies, addPharmacyMarkers]);
+
   // Reset selection when user changes view
   useEffect(() => {
     setSelectedPharmacy(null);
   }, [size]);
 
-  // Generate pharmacies with calculated distances
-  useEffect(() => {
-    if (!latitude || !longitude) return;
-
-    console.log("Calculating distances from:", latitude, longitude);
-
-    // Use either API data or sample data if API failed
-    const basePharmacies =
-      pharmacies.length > 0 ? pharmacies : SAMPLE_PHARMACIES;
-
-    const newPharmacies = basePharmacies.map((pharmacy) => {
-      // Generate realistic offsets if needed (for demo/sample data)
-      let pharmacyLat, pharmacyLng;
-
-      if (pharmacy.geoLocation?.latitude && pharmacy.geoLocation?.longitude) {
-        // Use existing coordinates if they exist
-        pharmacyLat = pharmacy.geoLocation.latitude;
-        pharmacyLng = pharmacy.geoLocation.longitude;
-      } else {
-        // Generate random coordinates for demo purposes
-        const distance = 0.5 + Math.random() * 2.5;
-        const angle = Math.random() * 2 * Math.PI;
-
-        // Convert polar to cartesian coordinates (approximately)
-        const latOffset = (distance / 111) * Math.cos(angle);
-        const lngOffset =
-          (distance / (111 * Math.cos(latitude * (Math.PI / 180)))) *
-          Math.sin(angle);
-
-        pharmacyLat = latitude + latOffset;
-        pharmacyLng = longitude + lngOffset;
-      }
-
-      // Calculate actual distance between user and pharmacy
-      const actualDistance = calculateDistance(
-        latitude,
-        longitude,
-        pharmacyLat,
-        pharmacyLng
-      );
-
-      console.log(
-        `Distance to ${pharmacy.name}: ${actualDistance.toFixed(2)} km`
-      );
-
-      // Return pharmacy with updated coordinates and distance
-      return {
-        ...pharmacy,
-        geoLocation: {
-          latitude: pharmacyLat,
-          longitude: pharmacyLng,
-        },
-        distance: formatDistance(actualDistance),
-      };
-    });
-
-    // Sort by distance (closest first)
-    newPharmacies.sort((a, b) => {
-      // Handle different unit formats correctly
-      const distA = a.distance!.includes("km")
-        ? parseFloat(a.distance!.replace(" km", ""))
-        : parseFloat(a.distance!.replace(" m", "")) / 1000;
-
-      const distB = b.distance!.includes("km")
-        ? parseFloat(b.distance!.replace(" km", ""))
-        : parseFloat(b.distance!.replace(" m", "")) / 1000;
-
-      return distA - distB;
-    });
-
-    console.log(
-      "Processed pharmacies:",
-      newPharmacies.map((p) => `${p.name}: ${p.distance}`)
-    );
-    setPharmacies(newPharmacies);
-  }, [latitude, longitude]);
+  // Helper function to parse distance value from string (either km or m format)
+  const parseDistanceValue = (distanceStr: string): number => {
+    if (distanceStr.includes("km")) {
+      return parseFloat(distanceStr.replace(" km", ""));
+    } else if (distanceStr.includes("m")) {
+      return parseFloat(distanceStr.replace(" m", "")) / 1000;
+    }
+    return 0;
+  };
 
   // Handle pharmacy selection
   const handleSelectPharmacy = useCallback(
@@ -281,157 +642,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
       mapInstance.setView([latitude, longitude], size);
     }
   }, [mapInstance, latitude, longitude, size]);
-
-  // Initialize map
-  useEffect(() => {
-    // Create map instance
-    const map = L.map("map", {
-      zoomControl: false, // We'll add custom zoom controls
-    }).setView([latitude, longitude], size);
-    setMapInstance(map);
-
-    // Add tile layer with a more modern map style
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png", {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    }).addTo(map);
-
-    // Add zoom controls to bottom right
-    L.control
-      .zoom({
-        position: "bottomright",
-      })
-      .addTo(map);
-
-    // Add user marker with pulsing effect
-    const userIcon = L.divIcon({
-      html: `<div class="user-marker"><div class="pulse"></div></div>`,
-      className: "user-location",
-      iconSize: [20, 20],
-    });
-
-    const userMarker = L.marker([latitude, longitude], { icon: userIcon })
-      .addTo(map)
-      .bindPopup("<b>Your Location</b>");
-
-    // Store a reference to identify this as user marker
-    (userMarker as any)._isUserMarker = true;
-    userMarker.openPopup();
-
-    // Add styles for markers and custom elements
-    const style = document.createElement("style");
-    style.innerHTML = `
-      .user-marker {
-        background-color: #4285F4;
-        border-radius: 50%;
-        height: 16px;
-        width: 16px;
-        position: relative;
-        box-shadow: 0 0 0 2px white;
-      }
-      .pulse {
-        background-color: rgba(66, 133, 244, 0.3);
-        border-radius: 50%;
-        height: 30px;
-        width: 30px;
-        position: absolute;
-        top: -7px;
-        left: -7px;
-        animation: pulse 2s infinite;
-      }
-      .pharmacy-marker {
-        font-size: 22px;
-        text-align: center;
-        width: 36px;
-        height: 36px;
-        line-height: 36px;
-        background-color: white;
-        border-radius: 50%;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      }
-      @keyframes pulse {
-        0% { transform: scale(0.8); opacity: 0.8; }
-        70% { transform: scale(1.5); opacity: 0; }
-        100% { transform: scale(0.8); opacity: 0; }
-      }
-      /* Custom popup styles */
-      .leaflet-popup-content-wrapper {
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      }
-      .leaflet-popup-content {
-        margin: 10px 14px;
-        line-height: 1.5;
-      }
-      .leaflet-container a.leaflet-popup-close-button {
-        color: #666;
-        padding: 8px 10px 0 0;
-      }
-      /* Zoom control */
-      .leaflet-control-zoom {
-        border: none !important;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
-      }
-      .leaflet-control-zoom a {
-        background-color: white !important;
-        color: #333 !important;
-      }
-    `;
-    document.head.appendChild(style);
-
-    // Cleanup
-    return () => {
-      map.remove();
-      document.head.removeChild(style);
-      setMapInstance(null);
-    };
-  }, [latitude, longitude, size]);
-
-  // Add pharmacy markers whenever pharmacies change
-  useEffect(() => {
-    if (!mapInstance || pharmacies.length === 0) return;
-
-    // Clear existing markers
-    mapInstance.eachLayer((layer) => {
-      if (layer instanceof L.Marker && !(layer as any)._isUserMarker) {
-        mapInstance.removeLayer(layer);
-      }
-    });
-
-    // Add pharmacy markers
-    pharmacies.forEach((pharmacy) => {
-      const pharmacyIcon = L.divIcon({
-        html: `<div class="pharmacy-marker">💊</div>`,
-        className: "pharmacy-icon",
-        iconSize: [36, 36],
-      });
-
-      // Default to Kurunegala coordinates if geoLocation is null
-      const lat = pharmacy.geoLocation?.latitude ?? 7.4847;
-      const lng = pharmacy.geoLocation?.longitude ?? 80.3667;
-
-      L.marker([lat, lng], { icon: pharmacyIcon })
-        .addTo(mapInstance)
-        .bindPopup(
-          `
-          <div style="font-family: system-ui, sans-serif;">
-            <div style="font-weight: 600; font-size: 16px; margin-bottom: 4px;">${
-              pharmacy.name
-            }</div>
-            <div style="font-size: 13px; color: #666; margin-bottom: 6px;">${formatAddress(
-              pharmacy
-            )}</div>
-            <div style="font-size: 13px; color: #4285F4; font-weight: 500;">${
-              pharmacy.distance
-            } away</div>
-          </div>
-        `
-        )
-        .on("click", () => {
-          setSelectedPharmacy(pharmacy);
-        });
-    });
-  }, [mapInstance, pharmacies]);
 
   return (
     <div className="map-container">
@@ -488,17 +698,22 @@ const MapComponent: React.FC<MapComponentProps> = ({
                       className="availability-badge"
                       style={{
                         backgroundColor: getAvailabilityColor(
-                          pharmacy.availability
+                          normalizeAvailability(pharmacy.availability)
                         ),
                       }}
                     >
-                      {"Incoming"}
+                      {normalizeAvailability(pharmacy.availability)}
                     </div>
                   </div>
                   <p className="pharmacy-address">{pharmacy.streetAddress}</p>
                   <div className="pharmacy-footer">
                     <p className="pharmacy-distance">
                       {pharmacy.distance} away
+                      <span className="travel-time">
+                        {estimateTravelTime(
+                          parseDistanceValue(pharmacy.distance || "0 km")
+                        )}
+                      </span>
                     </p>
                     <p className="pharmacy-hours">{pharmacy.openHours}</p>
                   </div>
@@ -512,6 +727,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         <div className="map-area">
           <div
             id="map"
+            ref={mapRef}
             style={{
               height: "100%",
               borderRadius: "12px",
@@ -536,7 +752,15 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
       {/* Selected pharmacy details panel */}
       {selectedPharmacy && (
-        <div className="pharmacy-details-panel">
+        <div
+          className="pharmacy-details-panel"
+          onClick={(e) => {
+            // Only navigate if not clicking on a button
+            if (!(e.target as HTMLElement).closest("button")) {
+              window.location.href = `/site/patient/${selectedPharmacy.name}`;
+            }
+          }}
+        >
           <div className="details-header">
             <div>
               <h2>{selectedPharmacy.name}</h2>
@@ -544,14 +768,21 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 className="availability"
                 style={{
                   backgroundColor: getAvailabilityColor(
-                    selectedPharmacy.availability
+                    normalizeAvailability(selectedPharmacy.availability)
                   ),
                 }}
               >
-                Availability: {selectedPharmacy.availability}
+                Availability:{" "}
+                {normalizeAvailability(selectedPharmacy.availability)}
               </div>
             </div>
-            <button className="close-btn" onClick={handleViewAll}>
+            <button
+              className="close-btn"
+              onClick={(e) => {
+                e.stopPropagation(); // Stop event from propagating to parent
+                handleViewAll();
+              }}
+            >
               ×
             </button>
           </div>
@@ -571,6 +802,11 @@ const MapComponent: React.FC<MapComponentProps> = ({
               <div>
                 <span className="detail-label">Distance</span>
                 <div className="detail-value">{selectedPharmacy.distance}</div>
+                <div className="detail-travel-time">
+                  {estimateTravelTime(
+                    parseDistanceValue(selectedPharmacy.distance || "0 km")
+                  )}
+                </div>
               </div>
             </div>
             <div className="detail-item">
@@ -591,17 +827,24 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
           <div className="details-actions">
             <button
-              onClick={() =>
+              onClick={(e) => {
+                e.stopPropagation(); // Stop event from propagating to parent
                 window.open(
                   `https://maps.google.com/maps?q=${selectedPharmacy.geoLocation.latitude},${selectedPharmacy.geoLocation.longitude}`,
                   "_blank"
-                )
-              }
+                );
+              }}
               className="directions-btn"
             >
               <span className="btn-icon">🧭</span> Get Directions
             </button>
-            <button className="call-btn">
+            <button
+              className="call-btn"
+              onClick={(e) => {
+                e.stopPropagation(); // Stop event from propagating to parent
+                window.open(`tel:${selectedPharmacy.phone}`, "_blank");
+              }}
+            >
               <span className="btn-icon">📞</span> Call Pharmacy
             </button>
           </div>
@@ -772,6 +1015,14 @@ const MapComponent: React.FC<MapComponentProps> = ({
           margin: 0;
           color: #4285f4;
           font-weight: 500;
+          display: flex;
+          flex-direction: column;
+        }
+        .travel-time {
+          font-size: 11px;
+          font-weight: normal;
+          color: #666;
+          margin-top: 2px;
         }
         .pharmacy-hours {
           margin: 0;
@@ -895,6 +1146,11 @@ const MapComponent: React.FC<MapComponentProps> = ({
           font-size: 15px;
           color: #333;
           font-weight: 500;
+        }
+        .detail-travel-time {
+          font-size: 12px;
+          color: #666;
+          margin-top: 2px;
         }
         .details-actions {
           display: flex;
