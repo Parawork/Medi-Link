@@ -70,7 +70,6 @@ export default function Sidebar() {
           collapsed={collapsed}
         />
 
-
         <NavItem
           href="/site/patient/order-history"
           icon={<Clock size={18} />}
@@ -79,15 +78,13 @@ export default function Sidebar() {
           collapsed={collapsed}
         />
 
-
         <NavItem
-          href="/site/patient/profile"
+          href="/site/patient/updateProfile"
           icon={<User size={18} />}
           label="User Profile"
           isActive={isActive("/site/patient/profile")}
           collapsed={collapsed}
         />
-
 
         <div
           className={`${
@@ -112,4 +109,3 @@ export default function Sidebar() {
     </div>
   );
 }
-
