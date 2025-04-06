@@ -52,7 +52,7 @@ export default async function PharmacyDashboard() {
         },
     });
 
-    const acceptedOrders = orders.filter((order) => order.status === "ACCEPTED");
+    const acceptedOrders = orders;
     const completedOrders = orders.filter((order) => order.status === "COMPLETED");
 
   return (

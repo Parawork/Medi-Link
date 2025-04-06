@@ -42,16 +42,11 @@ export default function OrderInfoPage({ params }: { params: { id: string } }) {
     // Check if user is logged in
     const userData = localStorage.getItem("user")
     if (!userData) {
-      router.push("/login")
       return
     }
 
     const parsedUser = JSON.parse(userData)
-    if (parsedUser.type !== "customer") {
-      router.push("/login")
-      return
-    }
-
+   
     setUser(parsedUser)
 
     // Mock order data
