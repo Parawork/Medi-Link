@@ -94,7 +94,12 @@ export default async function PharmacyPrescriptionsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Manage Prescriptions</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold mb-6">Manage Prescriptions</h1>
+        <Link href="/site/pharmacy/orders">
+          <Button>View All Orders</Button>
+        </Link>
+      </div>
 
       <div className="flex flex-col gap-6">
         {prescriptions.map((prescription) => (
