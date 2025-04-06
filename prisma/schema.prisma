@@ -118,6 +118,7 @@ model Pharmacy {
   licenseNumber String       @unique
   licenseFile   String?
   verified      Boolean      @default(false)
+  logo          String?
 }
 
 model Prescription {
@@ -135,7 +136,8 @@ model Order {
   pharmacy       Pharmacy     @relation(fields: [pharmacyId], references: [id])
   items          OrderItem[]
   totalAmount    Float
-  payment        Payment?
+  paymentId      String       @unique @db.ObjectId
+  payment        Payment?      @relation(fields: [paymentId], references: [id])
   delivery       Delivery?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
@@ -156,8 +158,7 @@ model OrderItem {
 
 model Payment {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  orderId   String   @unique @db.ObjectId
-  order     Order    @relation(fields: [orderId], references: [id])
+  order     Order[]
   amount    Float
   createdAt DateTime @default(now())
 }

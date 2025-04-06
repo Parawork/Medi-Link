@@ -1,13 +1,11 @@
-"use client"
-
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+// app/customer/dashboard/page.tsx (or wherever your route is)
 import Image from "next/image"
+import Link from "next/link"
 import { Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Sidebar from "@/components/sidebar"
-import Link from "next/link"
+import { requireUser } from "@/lib/requireUser"
 
 type Order = {
   id: string
@@ -20,59 +18,31 @@ type Order = {
   originalPrice: number
 }
 
-export default function CustomerDashboard() {
-  const [user, setUser] = useState<any>(null)
-  const [orders, setOrders] = useState<Order[]>([])
-  const router = useRouter()
+export default async function CustomerDashboard() {
+  const user = await requireUser("PATIENT") // runs server-side
 
-  useEffect(() => {
-    // Check if user is logged in
-    const userData = localStorage.getItem("user")
-    if (!userData) {
-      router.push("/login")
-      return
-    }
-
-    const parsedUser = JSON.parse(userData)
-    if (parsedUser.type !== "customer") {
-      router.push("/login")
-      return
-    }
-
-    setUser(parsedUser)
-
-    // Mock orders data
-    setOrders([
-      {
-        id: "order-1",
-        pharmacy: {
-          name: "CFC Pharmacy",
-          logo: "/placeholder.svg?height=64&width=64&text=CFC",
-        },
-        date: "2023/12/07",
-        price: 80.0,
-        originalPrice: 125.5,
+  const orders: Order[] = [
+    {
+      id: "order-1",
+      pharmacy: {
+        name: "CFC Pharmacy",
+        logo: "/placeholder.svg?height=64&width=64&text=CFC",
       },
-      {
-        id: "order-2",
-        pharmacy: {
-          name: "Healthguard Pharmacy",
-          logo: "/placeholder.svg?height=64&width=64&text=HG",
-        },
-        date: "2023/12/04",
-        price: 99.99,
-        originalPrice: 125.5,
+      date: "2023/12/07",
+      price: 80.0,
+      originalPrice: 125.5,
+    },
+    {
+      id: "order-2",
+      pharmacy: {
+        name: "Healthguard Pharmacy",
+        logo: "/placeholder.svg?height=64&width=64&text=HG",
       },
-    ])
-  }, [router])
-
-  const handleOrderInfo = (orderId: string) => {
-    router.push(`/customer/order-info/${orderId}`)
-  }
-
-  if (!user) {
-    return null // Loading state
-  }
+      date: "2023/12/04",
+      price: 99.99,
+      originalPrice: 125.5,
+    },
+  ]
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -138,14 +108,15 @@ export default function CustomerDashboard() {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-gray-600 border-gray-300"
-                        onClick={() => handleOrderInfo(order.id)}
-                      >
-                        Order Info
-                      </Button>
+                      <Link href={`/customer/order-info/${order.id}`}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-gray-600 border-gray-300"
+                        >
+                          Order Info
+                        </Button>
+                      </Link>
                       <Button size="sm" className="bg-[#0a2351] hover:bg-[#0a2351]/90 text-white">
                         Place New Order
                       </Button>
@@ -170,4 +141,3 @@ export default function CustomerDashboard() {
     </div>
   )
 }
-

@@ -1,104 +1,134 @@
-import { prisma } from "@/app/utils/db";
-import { signOut } from "@/lib/auth";
-import { requireUser } from "@/lib/requireUser";
-import { redirect } from "next/navigation";
-import Link from "next/link";
+// app/customer/dashboard/page.tsx (or wherever your route is)
+import Image from "next/image"
+import Link from "next/link"
+import { Search, ChevronLeft, ChevronRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import Sidebar from "@/components/sidebar"
+import { requireUser } from "@/lib/requireUser"
+import { prisma } from "@/app/utils/db"
 
-export default async function PatientDashboard() {
-  const user = await requireUser("PATIENT");
-
-  // Fetch complete patient data with all relations
-  const patient = await prisma.patient.findUnique({
-    where: {
-      userId: user.id,
-    },
-    include: {
-      geoLocation: true,
-      prescriptions: {
-        orderBy: {
-          createdAt: "desc",
-        },
-        take: 5, // Only get the 5 most recent prescriptions
-      },
-    },
-  });
-
-  if (!patient) {
-    redirect("/auth/complete-profile");
+type OrderSummary = {
+  id: string
+  pharmacy: {
+    name: string
+    logo: string | null
   }
+  createdAt: Date
+  totalAmount: number
+}
+
+export default async function CustomerDashboard() {
+  const user = await requireUser("PATIENT") // runs server-side
+  let orders: OrderSummary[] = []
+
+  console.log("Fetching orders from the database...");
+  console.log("User ID:", user.id); // Log the user ID for debugging
+  try {
+    orders = await prisma.order.findMany({
+      where: { Patient: { userId: user.id } },
+      select: {
+        id: true,
+        createdAt: true,
+        totalAmount: true,
+        pharmacy: {
+          select: {
+            name: true,
+            logo: true,
+          },
+        },
+      },
+    });
+    console.log("Orders fetched successfully:", orders); // Log the fetched orders
+    console.log(orders);
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+  }
+  
 
   return (
-    <div className="container mx-auto p-4">
-      {/* Header Section */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Welcome, {patient.fullName}</h1>
-        </div>
-        <form
-          action={async () => {
-            "use server";
-            await signOut();
-            redirect("/login");
-          }}
-        >
-          <button
-            type="submit"
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-          >
-            Sign Out
-          </button>
-        </form>
-      </div>
+    <div className="flex min-h-screen bg-white">
+      <Sidebar />
+      <div className="flex-1 flex flex-col">
+        <header className="bg-[#0a2351] text-white p-4 flex items-center">
+          <div className="container mx-auto flex items-center">
+            <h1 className="text-xl font-medium">Home</h1>
+          </div>
+        </header>
 
-      {/* Personal Information Card */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Personal Information</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p className="font-medium">Date of Birth</p>
-            <p>{new Date(patient.dateOfBirth).toLocaleDateString()}</p>
+        <main className="flex-1 p-6">
+          <div className="flex justify-center gap-4 mb-8">
+            <Link href="/locate-pharmacies">
+              <Button className="bg-[#0a2351] hover:bg-[#0a2351]/90 text-white">
+                <Search className="mr-2 h-4 w-4" />
+                Pharmacies Near Me
+              </Button>
+            </Link>
+            <Link href="/track-orders">
+              <Button variant="outline" className="border-[#0a2351] text-[#0a2351]">
+                Track Orders
+              </Button>
+            </Link>
           </div>
-          <div>
-            <p className="font-medium">Gender</p>
-            <p>{patient.gender || "Not specified"}</p>
-          </div>
-          <div>
-            <p className="font-medium">Email</p>
-            <p>{user.email}</p>
-          </div>
-        </div>
-      </div>
 
-      {/* Address Card */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Address</h2>
-        <div className="space-y-2">
-          <p>{patient.streetAddress}</p>
-          <p>
-            {patient.city}, {patient.stateProvince} {patient.postalCode}
-          </p>
-          <p>{patient.country}</p>
-        </div>
-      </div>
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-xl font-semibold mb-4">Recent Orders</h2>
 
-      {/* Medical Information Card */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Medical Information</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p className="font-medium">Medical Conditions</p>
-            <p className="whitespace-pre-line">
-              {patient.medicalConditions || "None reported"}
-            </p>
+            <div className="space-y-6">
+              {orders.map((order) => (
+                <div key={order.id} className="bg-white rounded-lg border border-gray-200 p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 relative">
+                        <Image
+                          src={order.pharmacy.logo || "/placeholder.svg"}
+                          alt={order.pharmacy.name}
+                          width={64}
+                          height={64}
+                          className="object-contain"
+                        />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">{order.pharmacy.name}</h3>
+                        <div className="flex items-center gap-2">
+                          <span className="text-green-600 font-medium">${order.totalAmount.toFixed(2)}</span>
+                          {/* <span className="text-gray-400 line-through text-sm">${order.totalAmount.toFixed(2)}</span> */}
+                        </div>
+                        <p className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString("en-US")}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Link href={`/customer/order-info/${order.id}`}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-gray-600 border-gray-300"
+                        >
+                          Order Info
+                        </Button>
+                      </Link>
+                      <Button size="sm" className="bg-[#0a2351] hover:bg-[#0a2351]/90 text-white">
+                        Place New Order
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex justify-end mt-4">
+                    <div className="flex gap-1">
+                      <Button variant="outline" size="icon" className="h-8 w-8 rounded-md">
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="icon" className="h-8 w-8 rounded-md">
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div>
-            <p className="font-medium">Allergies</p>
-            <p className="whitespace-pre-line">
-              {patient.allergies || "None reported"}
-            </p>
-          </div>
-        </div>
+        </main>
       </div>
     </div>
-  );
+  )
 }
+
