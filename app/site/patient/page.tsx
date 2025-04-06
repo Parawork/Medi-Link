@@ -1,3 +1,4 @@
+
 // app/customer/dashboard/page.tsx (or wherever your route is)
 import Image from "next/image"
 import Link from "next/link"
@@ -113,3 +114,4 @@ export default async function CustomerDashboard() {
       </div>
   )
 }
+

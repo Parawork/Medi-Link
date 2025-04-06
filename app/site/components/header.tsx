@@ -6,7 +6,7 @@ export default function PageHeader() {
   const pathname = usePathname();
 
   const getPageTitle = (path: string) => {
-    const segments = path.split("/");
+    const segments = path.split("/").filter(Boolean).slice(0, 3);
     const lastSegment = segments[segments.length - 1];
 
     // Convert the last segment to title case

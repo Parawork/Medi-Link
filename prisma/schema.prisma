@@ -87,7 +87,7 @@ model Patient {
   fullName          String
   dateOfBirth       DateTime
   gender            String?
-  avatar            String?
+  avatar            String?        @default("")
   streetAddress     String
   city              String
   stateProvince     String
@@ -107,7 +107,7 @@ model Pharmacy {
   userId        String         @unique @db.ObjectId
   user          User           @relation(fields: [userId], references: [id])
   name          String
-  logo          String?
+  logo          String         @default("")
   phone         String
   streetAddress String
   city          String
@@ -121,6 +121,7 @@ model Pharmacy {
   licenseFile   String?
   verified      Boolean        @default(false)
   Prescription  Prescription[]
+  availability  Availability[] 
 }
 
 model Prescription {
@@ -191,4 +192,18 @@ model GeoLocation {
   longitude Float
   Patient   Patient[]
   Pharmacy  Pharmacy[]
+}
+
+model Availability {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  pharmacyId String   @db.ObjectId
+  pharmacy   Pharmacy @relation(fields: [pharmacyId], references: [id])
+  dayOfWeek  Int      // 0-6 representing Sunday-Saturday
+  openTime   String   // Format: "HH:mm"
+  closeTime  String   // Format: "HH:mm"
+  isOpen     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([pharmacyId, dayOfWeek])
 }
