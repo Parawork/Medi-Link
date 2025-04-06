@@ -51,6 +51,17 @@ export default async function OrderInfoPage({ params }: {params: Promise<{ order
                 <div className="flex flex-col items-end">
                   <span className="text-sm font-medium">Order #{order.id}</span>
                   <span className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</span>
+                  <span
+                    className={`text-sm mt-1 px-2 py-1 rounded-full ${
+                      order.status === "ACCEPTED"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : order.status === "COMPLETED"
+                          ? "bg-blue-100 text-blue-800"
+                              : "bg-gray-100 text-gray-800"
+                    }`}
+                  >
+                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                  </span>
                   
                 </div>
               </div>
@@ -74,24 +85,24 @@ export default async function OrderInfoPage({ params }: {params: Promise<{ order
                 <h3 className="text-lg font-medium mb-4">Order Summary</h3>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Subtotal</span>
+                    <span className="text-gray-600">Total Amount</span>
                     <span>LKR {order.totalAmount.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
 
               <div className="border-t border-gray-200 pt-6 mb-6">
-                <h3 className="text-lg font-medium mb-4">Delivery Information</h3>
+                <h3 className="text-lg font-medium mb-4">Prescription Information</h3>
                 {/* <p className="text-gray-700">{order.deliveryAddress}</p>
                 <p className="text-gray-700 mt-2">Payment Method: {order.paymentMethod}</p> */}
                 <p className="text-gray-700 mt-2">Prescription ID: {order.prescription.id}</p>
+                <p className="text-gray-700 mt-2">Created At: {new Date(order.prescription.createdAt).toLocaleDateString()}</p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href={order.prescription.fileUrl} className="flex-1" target="_blank" rel="noopener noreferrer" download>
+                <Link href={order.prescription.fileUrl} className="flex-1" target="_blank" rel="noopener noreferrer" >
                     <Button variant="outline" className="flex items-center gap-2" >
-                    <Download className="h-4 w-4" />
-                    Download Prescription
+                    View Prescription
                     </Button>
                 </Link>
               </div>
