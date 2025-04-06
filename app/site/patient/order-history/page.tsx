@@ -52,7 +52,7 @@ export default async function PharmacyDashboard() {
         },
     });
 
-    const acceptedOrders = orders;
+    const acceptedOrders = orders.filter((order) => order.status === "ACCEPTED");
     const completedOrders = orders.filter((order) => order.status === "COMPLETED");
 
   return (
@@ -221,13 +221,13 @@ export default async function PharmacyDashboard() {
                             </div>
                           </div>
                           <div className="flex gap-2">
-                            <Link href={`/customer/order-info/${order.id}`}>
+                            <Link href={`/site/patient/order-history/order-info/${order.id}`}>
                                 <Button
                                 variant="outline"
                                 size="sm"
                                 className="text-gray-600 border-gray-300 rounded-full"
                                 >
-                                Order Info
+                                    Order Info
                                 </Button>
                             </Link>
                             <Button
@@ -250,120 +250,3 @@ export default async function PharmacyDashboard() {
   );
 }
 
-const acceptedOrders: Order[] = [
-  {
-    id: 9,
-    name: "L.G.L Karinda",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "accepted",
-  },
-  {
-    id: 10,
-    name: "K.H. Wijayawardana",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "accepted",
-  },
-  {
-    id: 11,
-    name: "S.Yathushan",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "accepted",
-  },
-  {
-    id: 12,
-    name: "H.H.Himala",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "accepted",
-  },
-  {
-    id: 13,
-    name: "R.Ridhmi",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "accepted",
-  },
-  {
-    id: 14,
-    name: "J.K. Sumathipala",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "accepted",
-  },
-  {
-    id: 15,
-    name: "S.Jayasinghe",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "accepted",
-  },
-  {
-    id: 16,
-    name: "L.H.Edirisinghe",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "accepted",
-  },
-];
-
-const completedOrders: Order[] = [
-  {
-    id: 17,
-    name: "L.G.L Karinda",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "completed",
-  },
-  {
-    id: 18,
-    name: "K.H. Wijayawardana",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "completed",
-  },
-  {
-    id: 19,
-    name: "S.Yathushan",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "completed",
-  },
-  {
-    id: 20,
-    name: "H.H.Himala",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "completed",
-  },
-  {
-    id: 21,
-    name: "R.Ridhmi",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "completed",
-  },
-  {
-    id: 22,
-    name: "J.K. Sumathipala",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "completed",
-  },
-  {
-    id: 23,
-    name: "S.Jayasinghe",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "completed",
-  },
-  {
-    id: 24,
-    name: "L.H.Edirisinghe",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "completed",
-  },
-];
