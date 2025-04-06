@@ -79,7 +79,7 @@ export default async function CustomerDashboard() {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Link href={`/customer/order-info/${order.id}`}>
+                      <Link href={`/site/patient/order-history/order-info/${order.id}`}>
                         <Button
                           variant="outline"
                           size="sm"

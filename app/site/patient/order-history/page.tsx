@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { requireUser } from "@/lib/requireUser";
 import { prisma } from "@/app/utils/db";
 
-export default async function PharmacyDashboard() {
+export default async function PatientOderHistory() {
 
     const user = await requireUser("PATIENT") // runs server-side
 
@@ -46,6 +46,7 @@ export default async function PharmacyDashboard() {
 
     const acceptedOrders = orders.filter((order) => order.status === "ACCEPTED");
     const completedOrders = orders.filter((order) => order.status === "COMPLETED");
+    
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -154,7 +155,7 @@ export default async function PharmacyDashboard() {
                             <div>
                               <h3 className="font-medium">{order.pharmacy.name}</h3>
                               <p className="text-sm text-gray-500">
-                                {order.pharmacy.name}
+                                {order.createdAt.toLocaleDateString("en-US")}
                               </p>
                             </div>
                           </div>
@@ -168,12 +169,15 @@ export default async function PharmacyDashboard() {
                                     Order Info
                                 </Button>
                             </Link>
-                            <Button
-                              size="sm"
-                              className="bg-amber-500 hover:bg-amber-600 text-white rounded-full"
-                            >
-                              Accepted
-                            </Button>
+                            {/* <form action={`/api/patient/updateOrderStatus/${order.id}`} method="POST"> */}
+                              <Button
+                                type="submit"
+                                size="sm"
+                                className="bg-amber-500 hover:bg-amber-600 text-white rounded-full"
+                              >
+                                Accepted
+                              </Button>
+                            {/* </form> */}
                           </div>
                         </div>
                       </div>
