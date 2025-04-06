@@ -8,19 +8,26 @@ import { toast } from "sonner";
 
 interface OrderItem {
   name: string;
-  price: number;
-  quantity: number;
+  price: string;
+  quantity: string;
 }
 
 export function OrderForm({ prescription }: { prescription: string }) {
   const router = useRouter();
   const [items, setItems] = useState<OrderItem[]>([
-    { name: "", price: 0, quantity: 1 },
+    { name: "", price: "", quantity: "1" },
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Calculate total amount by parsing the string values
+  const totalAmount = items.reduce((sum, item) => {
+    const price = parseFloat(item.price) || 0;
+    const quantity = parseInt(item.quantity) || 0;
+    return sum + price * quantity;
+  }, 0);
+
   const handleAddItem = () => {
-    setItems([...items, { name: "", price: 0, quantity: 1 }]);
+    setItems([...items, { name: "", price: "", quantity: "1" }]);
   };
 
   const handleRemoveItem = (index: number) => {
@@ -34,21 +41,23 @@ export function OrderForm({ prescription }: { prescription: string }) {
   const handleItemChange = (
     index: number,
     field: keyof OrderItem,
-    value: string | number
+    value: string
   ) => {
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
     setItems(newItems);
   };
 
-  const totalAmount = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+
+    // Convert string values to numbers before submitting
+    const itemsToSubmit = items.map((item) => ({
+      ...item,
+      price: parseFloat(item.price) || 0,
+      quantity: parseInt(item.quantity) || 1,
+    }));
 
     const createOrderPromise = new Promise(async (resolve, reject) => {
       try {
@@ -59,7 +68,7 @@ export function OrderForm({ prescription }: { prescription: string }) {
           },
           body: JSON.stringify({
             prescriptionId: prescription,
-            items: items,
+            items: itemsToSubmit, // Use the converted items
           }),
         });
 
@@ -108,24 +117,26 @@ export function OrderForm({ prescription }: { prescription: string }) {
             <div className="col-span-3">
               <label className="block text-sm font-medium mb-1">Price</label>
               <Input
-                type="number"
-                min="0"
-                step="0.01"
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9]*\.?[0-9]*"
                 value={item.price}
                 onChange={(e) =>
-                  handleItemChange(index, "price", parseFloat(e.target.value))
+                  handleItemChange(index, "price", e.target.value)
                 }
+                placeholder="0.00"
                 required
               />
             </div>
             <div className="col-span-2">
               <label className="block text-sm font-medium mb-1">Quantity</label>
               <Input
-                type="number"
-                min="1"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={item.quantity}
                 onChange={(e) =>
-                  handleItemChange(index, "quantity", parseInt(e.target.value))
+                  handleItemChange(index, "quantity", e.target.value)
                 }
                 required
               />
