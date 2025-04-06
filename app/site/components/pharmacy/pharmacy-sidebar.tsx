@@ -56,7 +56,7 @@ export default function PharmacySidebar() {
         </Link>
 
         <Link
-          href="/site/pharmacy/profile"
+          href="/site/pharmacy/updateProfile"
           className={`flex items-center gap-3 p-3 rounded-md ${
             isActive("/dashboardNew/pharmacy/profile")
               ? "bg-blue-200 text-blue-800"
