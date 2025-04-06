@@ -30,9 +30,9 @@ export default function PharmacySidebar() {
 
       <nav className="p-3 space-y-2">
         <Link
-          href="/dashboardNew/pharmacy"
+          href="/site/pharmacy"
           className={`flex items-center gap-3 p-3 rounded-md ${
-            isActive("/dashboardNew/pharmacy") ? "bg-blue-200 text-blue-800" : "hover:bg-gray-100"
+            isActive("/site/pharmacy") ? "bg-blue-200 text-blue-800" : "hover:bg-gray-100"
           }`}
         >
           <Home size={18} />
@@ -64,7 +64,7 @@ export default function PharmacySidebar() {
         >
           <button
             type="submit"
-            className={`flex items-center gap-3 p-3 rounded-md ${collapsed ? "" : "mt-4"} bg-red-100 text-red-600 hover:bg-red-200`}
+            className={`flex items-center gap-3 p-3 rounded-md w-full ${collapsed ? "" : "mt-4"} bg-red-100 text-red-600 hover:bg-red-200`}
           >
             <LogOut size={18} />
             {!collapsed && <span>Logout</span>}

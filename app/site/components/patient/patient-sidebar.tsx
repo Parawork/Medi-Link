@@ -32,9 +32,9 @@ export default function Sidebar() {
 
       <nav className="p-3 space-y-2">
         <Link
-          href="/dashboardNew/patient"
+          href="/site/patient"
           className={`flex items-center gap-3 p-3 rounded-md ${
-            isActive("/dashboardNew/patient") ? "bg-blue-200 text-blue-800" : "hover:bg-gray-100"
+            isActive("/site/patient") ? "bg-blue-200 text-blue-800" : "hover:bg-gray-100"
           }`}
         >
           <Home size={18} />

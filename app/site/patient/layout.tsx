@@ -1,4 +1,4 @@
-import Sidebar from "@/components/sidebar";
+import Sidebar from "../components/patient/patient-sidebar";
 import PageHeader from "../components/header";
 
 export default function PatientLayout({
