@@ -138,8 +138,6 @@ model Order {
   pharmacy       Pharmacy     @relation(fields: [pharmacyId], references: [id])
   items          OrderItem[]
   totalAmount    Float
-  paymentId      String?      @unique @db.ObjectId
-  payment        Payment?     @relation(fields: [paymentId], references: [id])
   delivery       Delivery?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
@@ -156,14 +154,6 @@ model OrderItem {
   name     String
   price    Float
   quantity Int
-}
-
-model Payment {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  order     Order?
-  amount    Float
-  createdAt DateTime @default(now())
-  orderId   String   @db.ObjectId
 }
 
 model Subscription {
