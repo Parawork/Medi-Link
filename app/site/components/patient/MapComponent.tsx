@@ -838,7 +838,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
             >
               <span className="btn-icon">🧭</span> Get Directions
             </button>
-            <button
+            {/* <button
               className="call-btn"
               onClick={(e) => {
                 e.stopPropagation(); // Stop event from propagating to parent
@@ -846,7 +846,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
               }}
             >
               <span className="btn-icon">📞</span> Call Pharmacy
-            </button>
+            </button> */}
+            <Link
+              href={`/site/patient/${selectedPharmacy.id}`}
+              className="call-btn"
+            >
+              <button className="call-btn">Upload Prescription</button>
+            </Link>
           </div>
         </div>
       )}
