@@ -78,7 +78,7 @@ export function OrderForm({ prescription }: { prescription: string }) {
 
         const data = await response.json();
         resolve(data);
-        router.push("/site/pharmacy/prescriptions");
+        router.push("/site/pharmacy/order-history");
       } catch (error) {
         console.error("Error creating order:", error);
         reject(error);

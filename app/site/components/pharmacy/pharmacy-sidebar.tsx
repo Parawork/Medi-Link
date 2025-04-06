@@ -44,7 +44,7 @@ export default function PharmacySidebar() {
         </Link>
 
         <Link
-          href="/site/pharmacy/prescriptions"
+          href="/site/pharmacy/order-history"
           className={`flex items-center gap-3 p-3 rounded-md ${
             isActive("/dashboardNew/pharmacy/orders")
               ? "bg-blue-200 text-blue-800"
