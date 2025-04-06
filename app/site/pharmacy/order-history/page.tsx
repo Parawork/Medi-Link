@@ -137,9 +137,9 @@ export default async function PharmacyPrescriptionsPage() {
                       Order Completed
                     </Button>
                     <Link
-                      href={`/site/pharmacy/order-history/${prescription.id}`}
+                      href={`/site/pharmacy/orders/${prescription.Order[0].id}`}
                     >
-                      <Button>Create New Order</Button>
+                      <Button>View Order</Button>
                     </Link>
                   </>
                 ) : (
