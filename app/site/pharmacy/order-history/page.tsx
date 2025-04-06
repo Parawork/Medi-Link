@@ -105,7 +105,7 @@ export default async function PharmacyPrescriptionsPage() {
         {prescriptions.map((prescription) => (
           <div
             key={prescription.id}
-            className="flex flex-col bg-blue-200 h-[180px] rounded-3xl py-5 px-7 gap-4"
+            className="flex flex-col bg-blue-100 h-[180px] rounded-3xl py-5 px-7 gap-4"
           >
             {/* Card Header */}
             <div className="flex items-center justify-between px-3">
