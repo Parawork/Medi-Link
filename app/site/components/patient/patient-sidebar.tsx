@@ -64,9 +64,9 @@ export default function Sidebar() {
         </Link>
 
         <Link
-          href="/dashboardNew/patient/profile"
+          href="/site/patient/user_profile"
           className={`flex items-center gap-3 p-3 rounded-md ${
-            isActive("/dashboardNew/patient/profile") ? "bg-blue-200 text-blue-800" : "hover:bg-gray-100"
+            isActive("/site/patient/user_profile") ? "bg-blue-200 text-blue-800" : "hover:bg-gray-100"
           }`}
         >
           <User size={18} />

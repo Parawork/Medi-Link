@@ -54,7 +54,8 @@ export default function PharmacyProfilePage({
       })
 
       if (!response.ok) {
-        throw new Error('Failed to update profile')
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update profile');
       }
 
       toast({
@@ -64,10 +65,10 @@ export default function PharmacyProfilePage({
       setIsEditingPharmacy(false)
       router.refresh()
     } catch (error) {
-      console.error(error)
+      console.error("Error during profile update:", error)
       toast({
         title: "Error",
-        description: "Failed to update pharmacy details",
+        description: error.message || "Failed to update pharmacy details",
         variant: "destructive"
       })
     } finally {
