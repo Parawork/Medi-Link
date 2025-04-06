@@ -2,7 +2,7 @@ import { OrderForm } from "@/app/site/components/pharmacy/OrderForm";
 import { requireUser } from "@/lib/requireUser";
 import { prisma } from "@/app/utils/db";
 import Image from "next/image";
-import { format } from "date-fns";
+import { Button } from "@/components/ui/button"; // Make sure to import Button
 
 export default async function ReviewOrder({
   params,
@@ -49,10 +49,30 @@ export default async function ReviewOrder({
     return age;
   };
 
+  // Format the date using native JavaScript Date methods instead of date-fns
+  const formatDate = (date: Date) => {
+    const d = new Date(date);
+    return d.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+    });
+  };
+
+  // Helper function to get prescription file name
+  const getPrescriptionFileName = () => {
+    const patientName = prescription.patient.fullName.replace(/\s+/g, "_");
+    const fileExtension = prescription.fileUrl.split(".").pop();
+    return `prescription_${patientName}_${prescriptionId}.${fileExtension}`;
+  };
+
   return (
     <div className="max-w-4xl mx-auto py-8 space-y-8">
       <div className="space-y-2">
-        <h1 className="text-2xl font-bold">Create Order from Prescription</h1>
+        <h1 className="text-2xl font-bold">Create Order For Prescription</h1>
         <p className="text-gray-600">Prescription ID: {prescriptionId}</p>
       </div>
 
@@ -115,9 +135,24 @@ export default async function ReviewOrder({
               />
             )}
           </div>
-          {/* <p className="text-sm text-gray-500 mt-2">
-            Uploaded on {format(new Date(prescription.createdAt), "MMM d, yyyy 'at' h:mm a")}
-          </p> */}
+
+          <div className="flex items-center justify-between mt-4">
+            <p className="text-sm text-gray-500">
+              Uploaded on {formatDate(prescription.createdAt)}
+            </p>
+
+            {/* Download button */}
+            <a
+              href={prescription.fileUrl}
+              download={getPrescriptionFileName()}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button variant="outline" size="sm">
+                Download Prescription
+              </Button>
+            </a>
+          </div>
         </div>
       </div>
 
