@@ -5,14 +5,8 @@ import { Input } from "@/components/ui/input";
 import PharmacySidebar from "@/components/pharmacy-sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { requireUser } from "@/lib/requireUser";
-
-type Order = {
-  id: number;
-  name: string;
-  date: string;
-  avatar: string;
-  status: "pending" | "accepted" | "completed";
-};
+import Link from "next/link";
+import { prisma } from "@/app/utils/db";
 
 export default async function PharmacyDashboard() {
 
@@ -21,6 +15,32 @@ export default async function PharmacyDashboard() {
   if (!user) {
     return null; // Loading state
   }
+
+  const orders = await prisma.order.findMany({
+          where: { 
+            pharmacyId: user.pharmacy?.id, // Filter by the logged-in user's patient ID
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          select: {
+            id: true,
+            createdAt: true,
+            totalAmount: true,
+            status: true,
+            Patient: {
+              select: {
+                id: true,
+                fullName: true,
+                avatar: true,
+              },
+            },
+          },
+      });
+
+      const acceptedOrders = orders.filter((order) => order.status === "ACCEPTED");
+      const completedOrders = orders.filter((order) => order.status === "COMPLETED");
+  
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -48,15 +68,15 @@ export default async function PharmacyDashboard() {
               </div>
             </div> */}
 
-            <Tabs defaultValue="pending" >
+            <Tabs defaultValue="accepted" >
               <div className="flex gap-4 mb-6">
                 <TabsList className="grid w-full grid-cols-3 h-auto p-0 bg-transparent gap-4">
-                  <TabsTrigger
+                  {/* <TabsTrigger
                     value="pending"
                     className="data-[state=active]:bg-red-500 data-[state=active]:text-white bg-red-100 text-red-500 rounded-md py-2"
                   >
                     Pending Orders
-                  </TabsTrigger>
+                  </TabsTrigger> */}
                   <TabsTrigger
                     value="accepted"
                     className="data-[state=active]:bg-amber-500 data-[state=active]:text-white bg-amber-100 text-amber-500 rounded-md py-2"
@@ -72,7 +92,7 @@ export default async function PharmacyDashboard() {
                 </TabsList>
               </div>
 
-              <TabsContent value="pending" className="mt-0">
+              {/* <TabsContent value="pending" className="mt-0">
                 <div className="bg-white rounded-lg border border-gray-100 p-6">
                   <h2 className="text-xl font-semibold mb-4">Pending Orders</h2>
 
@@ -86,28 +106,30 @@ export default async function PharmacyDashboard() {
                           <div className="flex items-center gap-4">
                             <div className="w-16 h-16 rounded-full overflow-hidden">
                               <Image
-                                src={order.avatar || "/placeholder.svg"}
-                                alt={order.name}
+                                src={order.Patient?.avatar || "/placeholder.svg"}
+                                alt={order.Patient?.fullName || "patient"}
                                 width={64}
                                 height={64}
                                 className="object-cover"
                               />
                             </div>
                             <div>
-                              <h3 className="font-medium">{order.name}</h3>
+                              <h3 className="font-medium">{order.Patient?.fullName}</h3>
                               <p className="text-sm text-gray-500">
-                                {order.date}
+                                {order.createdAt.toLocaleDateString("en-US")}
                               </p>
                             </div>
                           </div>
                           <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-gray-600 border-gray-300 rounded-full"
-                            >
-                              Order Info
-                            </Button>
+                            <Link href={`/site/pharmacy/order-info/${order.id}`}>
+                                <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-gray-600 border-gray-300 rounded-full"
+                                >
+                                    Order Info
+                                </Button>
+                            </Link>
                             <Button
                               size="sm"
                               className="bg-red-500 hover:bg-red-600 text-white rounded-full"
@@ -120,7 +142,7 @@ export default async function PharmacyDashboard() {
                     ))}
                   </div>
                 </div>
-              </TabsContent>
+              </TabsContent> */}
 
               <TabsContent value="accepted" className="mt-0">
                 <div className="bg-white rounded-lg border border-gray-100 p-6">
@@ -138,28 +160,30 @@ export default async function PharmacyDashboard() {
                           <div className="flex items-center gap-4">
                             <div className="w-16 h-16 rounded-full overflow-hidden">
                               <Image
-                                src={order.avatar || "/placeholder.svg"}
-                                alt={order.name}
+                                src={order.Patient?.avatar || "/placeholder.svg"}
+                                alt={order.Patient?.fullName || "patient"}
                                 width={64}
                                 height={64}
                                 className="object-cover"
                               />
                             </div>
                             <div>
-                              <h3 className="font-medium">{order.name}</h3>
+                              <h3 className="font-medium">{order.Patient?.fullName}</h3>
                               <p className="text-sm text-gray-500">
-                                {order.date}
+                                {order.createdAt.toLocaleDateString("en-US")}
                               </p>
                             </div>
                           </div>
                           <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-gray-600 border-gray-300 rounded-full"
-                            >
-                              Order Info
-                            </Button>
+                            <Link href={`/site/pharmacy/order-info/${order.id}`}>
+                                <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-gray-600 border-gray-300 rounded-full"
+                                >
+                                    Order Info
+                                </Button>
+                            </Link>
                             <Button
                               size="sm"
                               className="bg-amber-500 hover:bg-amber-600 text-white rounded-full"
@@ -190,28 +214,30 @@ export default async function PharmacyDashboard() {
                           <div className="flex items-center gap-4">
                             <div className="w-16 h-16 rounded-full overflow-hidden">
                               <Image
-                                src={order.avatar || "/placeholder.svg"}
-                                alt={order.name}
+                                src={order.Patient?.avatar || "/placeholder.svg"}
+                                alt={order.Patient?.fullName || "patient"}
                                 width={64}
                                 height={64}
                                 className="object-cover"
                               />
                             </div>
                             <div>
-                              <h3 className="font-medium">{order.name}</h3>
+                              <h3 className="font-medium">{order.Patient?.fullName}</h3>
                               <p className="text-sm text-gray-500">
-                                {order.date}
+                                {order.createdAt.toLocaleDateString("en-US")}
                               </p>
                             </div>
                           </div>
                           <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-gray-600 border-gray-300 rounded-full"
-                            >
-                              Order Info
-                            </Button>
+                            <Link href={`/site/pharmacy/order-info/${order.id}`}>
+                                <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-gray-600 border-gray-300 rounded-full"
+                                >
+                                    Order Info
+                                </Button>
+                            </Link>
                             <Button
                               size="sm"
                               className="bg-teal-500 hover:bg-teal-600 text-white rounded-full"
@@ -233,179 +259,3 @@ export default async function PharmacyDashboard() {
   );
 }
 
-const pendingOrders: Order[] = [
-  {
-    id: 1,
-    name: "L.G.L Karinda",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "pending",
-  },
-  {
-    id: 2,
-    name: "K.H. Wijayawardana",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "pending",
-  },
-  {
-    id: 3,
-    name: "S.Yathushan",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "pending",
-  },
-  {
-    id: 4,
-    name: "H.H.Himala",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "pending",
-  },
-  {
-    id: 5,
-    name: "R.Ridhmi",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "pending",
-  },
-  {
-    id: 6,
-    name: "J.K. Sumathipala",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "pending",
-  },
-  {
-    id: 7,
-    name: "S.Jayasinghe",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "pending",
-  },
-  {
-    id: 8,
-    name: "L.H.Edirisinghe",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "pending",
-  },
-];
-
-const acceptedOrders: Order[] = [
-  {
-    id: 9,
-    name: "L.G.L Karinda",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "accepted",
-  },
-  {
-    id: 10,
-    name: "K.H. Wijayawardana",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "accepted",
-  },
-  {
-    id: 11,
-    name: "S.Yathushan",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "accepted",
-  },
-  {
-    id: 12,
-    name: "H.H.Himala",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "accepted",
-  },
-  {
-    id: 13,
-    name: "R.Ridhmi",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "accepted",
-  },
-  {
-    id: 14,
-    name: "J.K. Sumathipala",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "accepted",
-  },
-  {
-    id: 15,
-    name: "S.Jayasinghe",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "accepted",
-  },
-  {
-    id: 16,
-    name: "L.H.Edirisinghe",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "accepted",
-  },
-];
-
-const completedOrders: Order[] = [
-  {
-    id: 17,
-    name: "L.G.L Karinda",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "completed",
-  },
-  {
-    id: 18,
-    name: "K.H. Wijayawardana",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "completed",
-  },
-  {
-    id: 19,
-    name: "S.Yathushan",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "completed",
-  },
-  {
-    id: 20,
-    name: "H.H.Himala",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "completed",
-  },
-  {
-    id: 21,
-    name: "R.Ridhmi",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "completed",
-  },
-  {
-    id: 22,
-    name: "J.K. Sumathipala",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "completed",
-  },
-  {
-    id: 23,
-    name: "S.Jayasinghe",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "completed",
-  },
-  {
-    id: 24,
-    name: "L.H.Edirisinghe",
-    date: "2023/03/07",
-    avatar: "/placeholder.svg?height=64&width=64",
-    status: "completed",
-  },
-];

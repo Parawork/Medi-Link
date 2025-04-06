@@ -5,14 +5,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { requireUser } from "@/lib/requireUser";
 import { prisma } from "@/app/utils/db";
 
-type Order = {
-  id: number;
-  name: string;
-  date: string;
-  avatar: string;
-  status: "pending" | "accepted" | "completed";
-};
-
 export default async function PharmacyDashboard() {
 
     const user = await requireUser("PATIENT") // runs server-side

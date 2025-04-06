@@ -4,7 +4,7 @@ import Image from "next/image";
 import { ChevronLeft, MessageSquare, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"; // Adjust the path based on your project structure
 
-export default async function OrderInfoPage({ params }: {params: Promise<{ orderId: string }>}) {
+export default async function PharmacyOrderInfoPage({ params }: {params: Promise<{ orderId: string }>}) {
     const { orderId } = await params; // Get dynamic parameter (orderId)
     
     const order = await prisma.order.findUnique({
@@ -14,7 +14,7 @@ export default async function OrderInfoPage({ params }: {params: Promise<{ order
             createdAt: true,
             status: true,
             totalAmount: true,
-          pharmacy: true,
+          Patient: true,
           items: true,
           prescription: true,
         },
@@ -37,15 +37,15 @@ export default async function OrderInfoPage({ params }: {params: Promise<{ order
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 relative">
                     <Image
-                      src={order.pharmacy.logo || "/placeholder.svg"}
-                      alt={order.pharmacy.name}
+                      src={order.Patient?.avatar || "/placeholder.svg"}
+                      alt={order.Patient?.fullName || "patient"}
                       width={64}
                       height={64}
                       className="object-contain"
                     />
                   </div>
                   <div>
-                    <h2 className="text-xl font-semibold">{order.pharmacy.name}</h2>
+                    <h2 className="text-xl font-semibold">{order.Patient?.fullName}</h2>
                   </div>
                 </div>
                 <div className="flex flex-col items-end">
