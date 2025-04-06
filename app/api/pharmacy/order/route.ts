@@ -80,6 +80,7 @@ export async function POST(request: Request) {
           pharmacyId: user.pharmacy!.id,
           patientId: prescription.patient.id,
           prescriptionId: prescription.id,
+          status: "ACCEPTED",
           totalAmount,
           items: {
             create: items.map((item) => ({

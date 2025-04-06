@@ -78,6 +78,7 @@ export default function Sidebar() {
           collapsed={collapsed}
         />
 
+
         <NavItem
           href="/site/patient/profile"
           icon={<User size={18} />}
@@ -85,6 +86,7 @@ export default function Sidebar() {
           isActive={isActive("/site/patient/profile")}
           collapsed={collapsed}
         />
+
 
         <div
           className={`${
