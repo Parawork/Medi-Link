@@ -1,10 +1,10 @@
-import Sidebar from "@/app/dashboardNew/components/patient/patient-sidebar"
-import PageHeader from "@/app/dashboardNew/components/header"
+import Sidebar from "@/components/sidebar";
+import PageHeader from "../components/header";
 
 export default function PatientLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <div className="flex min-h-screen bg-white">
@@ -12,10 +12,8 @@ export default function PatientLayout({
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <PageHeader />
-        <main className="flex-1 p-6">
-          {children}
-        </main>
+        <main className="flex-1 p-6">{children}</main>
       </div>
     </div>
-  )
+  );
 }
