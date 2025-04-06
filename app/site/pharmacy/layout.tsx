@@ -1,5 +1,5 @@
-import PharmacySidebar from "@/components/pharmacy-sidebar";
 import PageHeader from "../components/header";
+import PharmacySidebar from "../components/pharmacy/pharmacy-sidebar";
 
 export default function PharmacyLayout({
   children,
