@@ -138,7 +138,7 @@ model Order {
   pharmacy       Pharmacy     @relation(fields: [pharmacyId], references: [id])
   items          OrderItem[]
   totalAmount    Float
-  paymentId      String       @unique @db.ObjectId
+  paymentId      String?      @unique @db.ObjectId
   payment        Payment?     @relation(fields: [paymentId], references: [id])
   delivery       Delivery?
   createdAt      DateTime     @default(now())
