@@ -27,5 +27,5 @@ export default async function PatientDashboard() {
     redirect("/auth/complete-profile");
   }
 
-  return <div className="container mx-auto p-4">{/* Header Section */}</div>;
+  return <div className="container mx-auto p-4">This is patient header</div>;
 }

@@ -20,7 +20,6 @@ model User {
   sessions      Session[]
   authenticator Authenticator[]
 
-  // Profile relations (only one will be populated based on role)
   patient  Patient?
   pharmacy Pharmacy?
 }
@@ -31,7 +30,6 @@ enum Role {
   ADMIN
 }
 
-// Authentication models (unchanged from your current schema)
 model Account {
   id                String  @id @default(auto()) @map("_id") @db.ObjectId
   userId            String  @db.ObjectId
