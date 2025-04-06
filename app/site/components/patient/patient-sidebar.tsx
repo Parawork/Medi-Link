@@ -58,7 +58,7 @@ export default function Sidebar() {
         </Link>
 
         <Link
-          href="/site/patient/locate-pharmacies"
+          href="/site/patient/order-history"
           className={`flex items-center gap-3 p-3 rounded-md ${
             isActive("/dashboardNew/patient/locate-pharmacies") ||
             isActive("/customer/track-orders")
