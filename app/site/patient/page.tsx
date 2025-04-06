@@ -23,10 +23,6 @@ export default async function PatientDashboard() {
     },
   });
 
-  const pharmacies = await prisma.pharmacy.findMany({});
-
-  console.log(pharmacies);
-
   if (!patient) {
     redirect("/auth/complete-profile");
   }
