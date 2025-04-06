@@ -87,7 +87,7 @@ model Patient {
   fullName          String
   dateOfBirth       DateTime
   gender            String?
-  avatar            String?
+  avatar            String?        @default("")
   streetAddress     String
   city              String
   stateProvince     String

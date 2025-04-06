@@ -71,7 +71,7 @@ export default function Sidebar() {
         </Link>
 
         <Link
-          href="/site/patient/profile"
+          href="/site/patient/updateProfile"
           className={`flex items-center gap-3 p-3 rounded-md ${
             isActive("/dashboardNew/patient/profile")
               ? "bg-blue-200 text-blue-800"
