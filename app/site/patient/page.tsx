@@ -3,8 +3,36 @@ import { signOut } from "@/lib/auth";
 import { requireUser } from "@/lib/requireUser";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import PharmacyCard from "../components/patient/PharmacyCard";
 
-export default async function PatientDashboard() {
+type Pharmacy = {
+  id: string;
+  name: string;
+  logo?: string;
+  phone: string;
+  streetAddress: string;
+  city: string;
+  stateProvince: string;
+  postalCode: string;
+  country: string;
+  verified: boolean;
+};
+
+type Props = {
+  pharmacies: Pharmacy[];
+};
+
+const PharmacyList: React.FC<Props> = ({ pharmacies }) => {
+  return (
+    <div className="grid gap-4 p-4">
+      {pharmacies.map((pharmacy) => (
+        <PharmacyCard key={pharmacy.id} pharmacy={pharmacy} />
+      ))}
+    </div>
+  );
+};
+
+export default async function PatientPage() {
   const user = await requireUser("PATIENT");
 
   // Fetch complete patient data with all relations
@@ -27,30 +55,13 @@ export default async function PatientDashboard() {
     redirect("/auth/complete-profile");
   }
 
+  // Fetch pharmacies
   const pharmacies = await prisma.pharmacy.findMany({});
 
   return (
-    <div className="container mx-auto p-4">
-      {/* Header Section */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Welcome, {patient.fullName}</h1>
-        </div>
-      </div>
-      <div className="flex flex-col gap-4 ">
-        {pharmacies.map((pharmacy) => (
-          <Link
-            key={pharmacy.id}
-            href={`/site/patient/${pharmacy.id}`}
-            className="flex items-center justify-between h-10 bg-yellow-100"
-          >
-            <div>Pharmacy Image</div>
-            <div className="flex flex-col gap-4">
-              <p>{pharmacy.name}</p>
-            </div>
-          </Link>
-        ))}
-      </div>
+    <div className="container mx-auto py-8">
+      <h1 className="text-2xl font-bold mb-6">Available Pharmacies</h1>
+      <PharmacyList pharmacies={pharmacies} />
     </div>
   );
 }
