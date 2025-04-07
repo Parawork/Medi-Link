@@ -86,15 +86,15 @@ model Patient {
   user              User           @relation(fields: [userId], references: [id])
   fullName          String
   dateOfBirth       DateTime
-  gender            String?
-  avatar            String?        @default("")
+  gender            String         @default("")
+  avatar            String         @default("")
   streetAddress     String
   city              String
   stateProvince     String
   postalCode        String
   country           String
-  medicalConditions String?
-  allergies         String?
+  medicalConditions String         @default("")
+  allergies         String         @default("")
   geoLocation       GeoLocation?   @relation(fields: [geoLocationId], references: [id])
   geoLocationId     String?        @db.ObjectId
   subscriptions     Subscription[]
@@ -121,7 +121,7 @@ model Pharmacy {
   licenseFile   String?
   verified      Boolean        @default(false)
   Prescription  Prescription[]
-  availability  Availability[] 
+  availability  Availability[]
 }
 
 model Prescription {
@@ -198,9 +198,9 @@ model Availability {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   pharmacyId String   @db.ObjectId
   pharmacy   Pharmacy @relation(fields: [pharmacyId], references: [id])
-  dayOfWeek  Int      // 0-6 representing Sunday-Saturday
-  openTime   String   // Format: "HH:mm"
-  closeTime  String   // Format: "HH:mm"
+  dayOfWeek  Int // 0-6 representing Sunday-Saturday
+  openTime   String // Format: "HH:mm"
+  closeTime  String // Format: "HH:mm"
   isOpen     Boolean  @default(true)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
