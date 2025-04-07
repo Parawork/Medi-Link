@@ -58,13 +58,13 @@ export default async function trackOrder({ params }: { params: Promise<{ orderId
               <h2 className="text-2xl font-bold mb-6">Order Progress</h2>
 
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 relative">
+                <div className="w-16 h-16 relative overflow-hidden">
                   <Image
                     src={order.pharmacy.logo || "/placeholder.svg"}
                     alt={order.pharmacy.name}
                     width={48}
                     height={48}
-                    className="object-contain"
+                    className="object-cover"
                   />
                 </div>
                 <div>
