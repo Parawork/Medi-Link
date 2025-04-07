@@ -163,32 +163,23 @@ export default async function PatientOderHistory() {
                             <h3 className="font-medium">
                               {order.pharmacy.name}
                             </h3>
-                            <p className="text-sm text-gray-500">
-                              {order.createdAt.toLocaleDateString("en-US")}
-                            </p>
+                            <div className="flex gap-1 flex-col">
+                              <span className="text-sm text-gray-500">
+                                {order.createdAt.toLocaleDateString("en-US")}
+                              </span>
+                              <span className="text-sm text-green-500">
+                                The pharmacy has accepted your prescription
+                              </span>
+                            </div>
                           </div>
                         </div>
                         <div className="flex gap-2">
                           <Link
                             href={`/site/patient/order-history/order-info/${order.id}`}
+                            className="flex items-center text-center px-2 py-1 bg-white ring-1 rounded-full text-red-700 hover:bg-red-700 hover:text-white text-sm font-normal ring-red-700 tracking-tighter"
                           >
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-gray-600 border-gray-300 rounded-full"
-                            >
-                              Order Info
-                            </Button>
+                            View Medications
                           </Link>
-                          {/* <form action={`/api/patient/updateOrderStatus/${order.id}`} method="POST"> */}
-                          <Button
-                            type="submit"
-                            size="sm"
-                            className="bg-amber-500 hover:bg-amber-600 text-white rounded-full"
-                          >
-                            Accepted
-                          </Button>
-                          {/* </form> */}
                         </div>
                       </div>
                     </div>
