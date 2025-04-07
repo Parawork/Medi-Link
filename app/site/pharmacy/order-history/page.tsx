@@ -113,7 +113,7 @@ export default async function PharmacyPrescriptionsPage() {
           >
             {/* Card Header */}
             <div className="flex items-center justify-between px-3">
-              <div className="text-lg tracking-tighter font-semibold">
+              <div className="text-lg tracking-tighter font-light">
                 Prescription : {prescription.patient.fullName}
               </div>
               <div className="text-sm">
