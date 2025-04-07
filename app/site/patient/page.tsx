@@ -65,15 +65,15 @@ export default async function CustomerDashboard() {
             </p>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             {orders.map((order, index) => (
               <div
                 key={index}
-                className="bg-white rounded-lg border border-gray-200 p-6"
+                className="bg-white rounded-lg border border-gray-200 p-4 md:p-6"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 relative">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <div className="w-12 h-12 md:w-16 md:h-16 relative flex-shrink-0 mb-4">
                       <Image
                         src={order.pharmacy.logo || "/placeholder.svg"}
                         alt={order.pharmacy.name}
@@ -83,36 +83,40 @@ export default async function CustomerDashboard() {
                       />
                     </div>
                     <div>
-                      <h3 className="font-medium">{order.pharmacy.name}</h3>
+                      <h3 className="font-medium text-sm md:text-base">
+                        {order.pharmacy.name}
+                      </h3>
                       <div className="flex items-center gap-2">
-                        <span className="text-green-600 font-medium">
+                        <span className="text-green-600 font-medium text-sm md:text-base">
                           LKR {order.totalAmount.toFixed(2)}
                         </span>
-                        {/* <span className="text-gray-400 line-through text-sm">${order.totalAmount.toFixed(2)}</span> */}
+                        {/* <span className="text-gray-400 line-through text-xs md:text-sm">${order.totalAmount.toFixed(2)}</span> */}
                       </div>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-xs md:text-sm text-gray-500">
                         {new Date(order.createdAt).toLocaleDateString("en-US")}
                       </p>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col xs:flex-row gap-2 w-full sm:w-auto">
                     <Link
                       href={`/site/patient/order-history/order-info/${order.id}`}
+                      className="w-full sm:w-auto"
                     >
                       <Button
                         variant="outline"
                         size="sm"
-                        className="text-gray-600 border-gray-300"
+                        className="text-gray-600 border-gray-300 w-full"
                       >
                         Order Info
                       </Button>
                     </Link>
                     <Link
                       href={`/site/patient/uploadPrescription/${order.pharmacy.id}`}
+                      className="w-full sm:w-auto"
                     >
                       <Button
                         size="sm"
-                        className="bg-[#0a2351] hover:bg-[#0a2351]/90 text-white"
+                        className="bg-[#0a2351] hover:bg-[#0a2351]/90 text-white w-full"
                       >
                         Upload Prescription
                       </Button>

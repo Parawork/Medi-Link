@@ -1,5 +1,7 @@
 import { prisma } from "@/app/utils/db";
+import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
 
 export default async function trackOrder({
   params,
@@ -59,6 +61,12 @@ export default async function trackOrder({
         <div className="max-w-3xl mx-auto">
           <div className="bg-white rounded-lg border border-gray-200 p-6">
             <h2 className="text-2xl font-bold mb-6">Order Progress</h2>
+
+            <Link href="/site/patient/track-order">
+              <Button variant="secondary" className="mb-4">
+                Back
+              </Button>
+            </Link>
 
             <div className="flex items-center gap-2 mb-6">
               <div className="w-16 h-16 relative overflow-hidden">
