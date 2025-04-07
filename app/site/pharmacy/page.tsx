@@ -57,18 +57,18 @@ export default async function PharmacyDashboard() {
           Bridging Patients And Pharmacies Effortlessly
         </h2>
 
-        <div className="w-full flex gap-3 items-center justify-center my-6">
+        <div className="w-2/3 flex gap-3 items-center justify-center my-6">
           <Link
             href={`/site/pharmacy/orders`}
-            className="px-3 py-3 bg-yellow-600 text-white rounded-2xl hover:bg-yellow-600/90"
+            className="w-1/2 py-2 text-center bg-yellow-600 text-white rounded-2xl hover:bg-yellow-600/90"
           >
-            Accepted Orders
+            Accepted Orders By Patients
           </Link>
           <Link
             href={`/site/pharmacy/orders`}
-            className="px-3 py-3 bg-green-900 text-white rounded-2xl hover:bg-green-900/90"
+            className="w-1/2 py-2 text-center bg-green-900 text-white rounded-2xl hover:bg-green-900/90"
           >
-            Completed Orders
+            Paid Orders By Patients
           </Link>
         </div>
 
