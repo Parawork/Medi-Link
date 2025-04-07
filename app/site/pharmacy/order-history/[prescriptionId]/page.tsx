@@ -24,6 +24,7 @@ export default async function ReviewOrder({
           streetAddress: true,
           city: true,
           stateProvince: true,
+          avatar: true,
         },
       },
     },
@@ -81,6 +82,15 @@ export default async function ReviewOrder({
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-lg font-semibold mb-4">Patient Information</h2>
           <div className="space-y-3">
+            <div className="size-[70px] relative rounded-full bg-white/20">
+              <Image
+                src={prescription.patient.avatar || "/images/noAvatar.png"}
+                alt={`${prescription.patient.fullName}'s avatar`}
+                fill
+                className="object-cover rounded-full"
+                priority
+              />
+            </div>
             <div>
               <p className="text-sm text-gray-500">Full Name</p>
               <p className="font-medium">{prescription.patient.fullName}</p>
@@ -136,7 +146,7 @@ export default async function ReviewOrder({
             )}
           </div>
 
-          <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center justify-between mt-4 gap-3">
             <p className="text-sm text-gray-500">
               Uploaded on {formatDate(prescription.createdAt)}
             </p>
