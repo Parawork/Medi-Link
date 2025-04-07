@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import Footer from "@/components/footer";
 import { LogOut, Menu, User2 } from "lucide-react";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import {
@@ -96,6 +97,7 @@ export default async function DashboardLayout({
           <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
             {children}
           </main>
+          <Footer />
         </div>
       </div>
     </>
