@@ -526,49 +526,58 @@ const MapComponent: React.FC<MapComponentProps> = ({
   // Function to add pharmacy markers to map
   const addPharmacyMarkers = useCallback(
     (map: L.Map | null) => {
-      if (!map || !map._container || pharmacies.length === 0) return;
+      if (!map || pharmacies.length === 0) return;
 
-      // Clear existing markers
-      map.eachLayer((layer) => {
-        if (layer instanceof L.Marker && !(layer as any)._isUserMarker) {
-          map.removeLayer(layer);
-        }
-      });
+      // Check if the map is properly initialized
+      try {
+        // This will throw an error if the map isn't properly initialized
+        if (!map.getContainer()) return;
 
-      // Add new markers
-      pharmacies.forEach((pharmacy) => {
-        const pharmacyIcon = L.divIcon({
-          html: `<div class="bg-white rounded-full h-9 w-9 flex items-center justify-center shadow-md text-2xl">💊</div>`,
-          className: "pharmacy-icon",
-          iconSize: [36, 36],
+        // Clear existing markers
+        map.eachLayer((layer) => {
+          if (layer instanceof L.Marker && !(layer as any)._isUserMarker) {
+            map.removeLayer(layer);
+          }
         });
 
-        const lat = pharmacy.geoLocation?.latitude ?? latitude;
-        const lng = pharmacy.geoLocation?.longitude ?? longitude;
+        // Add new markers
+        pharmacies.forEach((pharmacy) => {
+          const pharmacyIcon = L.divIcon({
+            html: `<div class="bg-white rounded-full h-9 w-9 flex items-center justify-center shadow-md text-2xl">💊</div>`,
+            className: "pharmacy-icon",
+            iconSize: [36, 36],
+          });
 
-        try {
-          L.marker([lat, lng], { icon: pharmacyIcon })
-            .addTo(map)
-            .bindPopup(
-              `
-            <div class="font-sans">
-              <div class="font-semibold text-base mb-1">${pharmacy.name}</div>
-              <div class="text-sm text-gray-600 mb-1.5">${formatAddress(
-                pharmacy
-              )}</div>
-              <div class="text-sm text-[#4285F4] font-medium">${
-                pharmacy.distance
-              } away</div>
-            </div>
-          `
-            )
-            .on("click", () => {
-              setSelectedPharmacy(pharmacy);
-            });
-        } catch (error) {
-          console.error("Error adding marker:", error);
-        }
-      });
+          const lat = pharmacy.geoLocation?.latitude ?? latitude;
+          const lng = pharmacy.geoLocation?.longitude ?? longitude;
+
+          try {
+            L.marker([lat, lng], { icon: pharmacyIcon })
+              .addTo(map)
+              .bindPopup(
+                `
+              <div class="font-sans">
+                <div class="font-semibold text-base mb-1">${pharmacy.name}</div>
+                <div class="text-sm text-gray-600 mb-1.5">${formatAddress(
+                  pharmacy
+                )}</div>
+                <div class="text-sm text-[#4285F4] font-medium">${
+                  pharmacy.distance
+                } away</div>
+              </div>
+            `
+              )
+              .on("click", () => {
+                setSelectedPharmacy(pharmacy);
+              });
+          } catch (error) {
+            console.error("Error adding marker:", error);
+          }
+        });
+      } catch (error) {
+        console.error("Map is not fully initialized:", error);
+        return;
+      }
     },
     [pharmacies, latitude, longitude]
   );
@@ -578,8 +587,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
     if (mapInstance && pharmacies.length > 0) {
       // Use a small delay to ensure the map is fully initialized
       const timer = setTimeout(() => {
-        if (mapInstance && mapInstance._container) {
-          addPharmacyMarkers(mapInstance);
+        try {
+          if (mapInstance && mapInstance.getContainer()) {
+            addPharmacyMarkers(mapInstance);
+          }
+        } catch (error) {
+          console.error("Map not ready for markers:", error);
         }
       }, 100);
 
