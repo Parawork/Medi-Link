@@ -15,7 +15,8 @@ export default async function CustomerDashboard() {
       patientId: user.patient?.id, // Filter by the logged-in user's patient ID
       // status: "COMPLETED"
     },
-    take: 5, // Filter for pending and completed orders,user.patient.id
+    take: 5,
+
     select: {
       id: true,
       createdAt: true,
@@ -27,6 +28,9 @@ export default async function CustomerDashboard() {
           logo: true,
         },
       },
+    },
+    orderBy: {
+      createdAt: "desc",
     },
   });
 
@@ -51,9 +55,15 @@ export default async function CustomerDashboard() {
         </div>
 
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-xl font-semibold mb-4">
-            Recent Responses From Pharmacies
-          </h2>
+          <div className="flex flex-col gap-2 mb-4">
+            <h2 className="text-xl font-semibold">
+              Recent Responses From Pharmacies
+            </h2>
+            <p className="text-sm">
+              Orders that have been created from pharmacies according to your
+              prescriptions
+            </p>
+          </div>
 
           <div className="space-y-6">
             {orders.map((order, index) => (
@@ -107,24 +117,6 @@ export default async function CustomerDashboard() {
                         Upload Prescription
                       </Button>
                     </Link>
-                  </div>
-                </div>
-                <div className="flex justify-end mt-4">
-                  <div className="flex gap-1">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8 rounded-md"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8 rounded-md"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
                   </div>
                 </div>
               </div>

@@ -155,7 +155,7 @@ export default async function PatientOderHistory() {
                               size="sm"
                               className="text-gray-600 border-gray-300 rounded-full"
                             >
-                              Order Info
+                              View Prescription
                             </Button>
                           </Link>
                         </div>
@@ -168,9 +168,15 @@ export default async function PatientOderHistory() {
 
             <TabsContent value="accepted" className="mt-0">
               <div className="bg-white rounded-lg border border-gray-100 p-6">
-                <h2 className="text-xl font-semibold mb-4">
-                  Accepted Prescriptions
-                </h2>
+                <div>
+                  <h2 className="text-xl font-semibold mb-4">
+                    Accepted Prescriptions
+                  </h2>
+                  <p className="text-sm text-gray-400">
+                    When pharmacists assign medications for you, they will
+                    appear here as Orders
+                  </p>
+                </div>
 
                 <div className="space-y-4">
                   {acceptedOrders.map((order) => (

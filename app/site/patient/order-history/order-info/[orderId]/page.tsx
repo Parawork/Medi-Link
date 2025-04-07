@@ -41,7 +41,7 @@ export default async function OrderInfoPage({
           </Link>
 
           <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-10">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 relative">
                   <Image
