@@ -60,19 +60,20 @@ export default async function PharmacyDashboard() {
         <div className="w-2/3 flex gap-3 items-center justify-center my-6">
           <Link
             href={`/site/pharmacy/orders`}
-            className="w-1/2 py-2 text-center bg-yellow-600 text-white rounded-2xl hover:bg-yellow-600/90"
+            className="w-1/2 py-2 text-center bg-yellow-600 text-white rounded-2xl hover:bg-yellow-600/90 text-sm"
           >
             Accepted Orders By Patients
           </Link>
           <Link
             href={`/site/pharmacy/orders`}
-            className="w-1/2 py-2 text-center bg-green-900 text-white rounded-2xl hover:bg-green-900/90"
+            className="w-1/2 py-2 text-center bg-green-900 text-white rounded-2xl hover:bg-green-900/90 text-sm"
           >
             Paid Orders By Patients
           </Link>
         </div>
 
         <div className="space-y-4 w-full">
+          <h1 className="text-lg font-semibold ">Orders You have created </h1>
           {orders.map((order) => (
             <div
               key={order.id}
