@@ -48,15 +48,16 @@ export default function PageFooter() {
 
   return (
     <motion.footer
-      className="bg-gradient-to-r from-[#0a2351] to-[#1a3a6a] text-white py-8 relative overflow-hidden"
+      className="bg-gradient-to-r from-[#0a2351] via-[#1a3a6a] to-[#0a2351] text-white py-8 relative overflow-hidden"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
       transition={{ duration: 0.5 }}
     >
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute w-96 h-96 -top-48 -left-48 bg-blue-400 rounded-full opacity-10 blur-3xl" />
-        <div className="absolute w-96 h-96 -bottom-48 -right-48 bg-indigo-400 rounded-full opacity-10 blur-3xl" />
+        <div className="absolute w-[400px] h-[400px] -top-24 -left-24 bg-blue-400 rounded-full opacity-10 blur-3xl animate-pulse" />
+        <div className="absolute w-[400px] h-[400px] -bottom-24 -right-24 bg-indigo-400 rounded-full opacity-10 blur-3xl animate-pulse" />
+        <div className="absolute w-[200px] h-[200px] top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-purple-400 rounded-full opacity-5 blur-3xl animate-pulse" />
 
         {/* Animated particles */}
         {Array.from({ length: 20 }).map((_, i) => (
@@ -71,6 +72,7 @@ export default function PageFooter() {
             animate={{
               y: [null, Math.random() * 200],
               opacity: [0.3, 0.6, 0.3],
+              scale: [1, 1.2, 1],
             }}
             transition={{
               duration: 3 + Math.random() * 2,
@@ -91,7 +93,7 @@ export default function PageFooter() {
         transition={{ type: "spring", stiffness: 150, damping: 15 }}
         style={{
           background:
-            "radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%)",
+            "radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%)",
         }}
       />
 
@@ -104,10 +106,10 @@ export default function PageFooter() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <h3 className="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-blue-100">
+              <h3 className="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-300 via-blue-200 to-blue-100">
                 Medi-Link
               </h3>
-              <p className="text-blue-100 mb-4 max-w-md">
+              <p className="text-blue-100 mb-4 max-w-md leading-relaxed text-sm">
                 Connecting patients with pharmacies for seamless medication
                 management and healthcare solutions.
               </p>
@@ -116,15 +118,15 @@ export default function PageFooter() {
                   <motion.a
                     key={social.name}
                     href="#"
-                    className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
-                    whileHover={{ scale: 1.1 }}
+                    className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all duration-300 group"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
                     whileTap={{ scale: 0.95 }}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 + index * 0.1 }}
                   >
                     <svg
-                      className="w-5 h-5 text-white"
+                      className="w-5 h-5 text-white group-hover:text-blue-200 transition-colors"
                       fill="currentColor"
                       viewBox="0 0 24 24"
                     >
@@ -139,12 +141,18 @@ export default function PageFooter() {
           {/* Quick links */}
           <div>
             <motion.h4
-              className="text-lg font-semibold mb-4 text-blue-200"
+              className="text-lg font-semibold mb-4 text-blue-200 relative inline-block"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
               Quick Links
+              <motion.div
+                className="absolute -bottom-2 left-0 w-1/2 h-0.5 bg-gradient-to-r from-blue-400 to-transparent"
+                initial={{ width: 0 }}
+                animate={{ width: "50%" }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+              />
             </motion.h4>
             <ul className="space-y-2">
               {footerLinks.map((link, index) => (
@@ -156,7 +164,7 @@ export default function PageFooter() {
                 >
                   <Link
                     href={link.href}
-                    className="text-blue-100 hover:text-white transition-colors flex items-center group"
+                    className="text-blue-100 hover:text-white transition-all duration-300 flex items-center group text-sm"
                   >
                     <span className="w-0 h-0.5 bg-blue-300 mr-0 group-hover:w-2 group-hover:mr-2 transition-all duration-300"></span>
                     {link.name}
@@ -169,22 +177,32 @@ export default function PageFooter() {
           {/* Contact info */}
           <div>
             <motion.h4
-              className="text-lg font-semibold mb-4 text-blue-200"
+              className="text-lg font-semibold mb-4 text-blue-200 relative inline-block"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
             >
               Contact Us
+              <motion.div
+                className="absolute -bottom-2 left-0 w-1/2 h-0.5 bg-gradient-to-r from-blue-400 to-transparent"
+                initial={{ width: 0 }}
+                animate={{ width: "50%" }}
+                transition={{ delay: 0.7, duration: 0.5 }}
+              />
             </motion.h4>
             <motion.ul
-              className="space-y-2 text-blue-100"
+              className="space-y-2 text-blue-100 text-sm"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
             >
-              <li className="flex items-start">
+              <motion.li
+                className="flex items-start group"
+                whileHover={{ x: 5 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
                 <svg
-                  className="w-5 h-5 mr-2 mt-0.5 text-blue-300"
+                  className="w-5 h-5 mr-2 mt-0.5 text-blue-300 group-hover:text-blue-200 transition-colors"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -202,11 +220,17 @@ export default function PageFooter() {
                     d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
-                123 Healthcare Ave, Medical City
-              </li>
-              <li className="flex items-start">
+                <span className="group-hover:text-white transition-colors">
+                  123 Healthcare Ave
+                </span>
+              </motion.li>
+              <motion.li
+                className="flex items-start group"
+                whileHover={{ x: 5 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
                 <svg
-                  className="w-5 h-5 mr-2 mt-0.5 text-blue-300"
+                  className="w-5 h-5 mr-2 mt-0.5 text-blue-300 group-hover:text-blue-200 transition-colors"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -218,11 +242,17 @@ export default function PageFooter() {
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                   />
                 </svg>
-                support@medilink.com
-              </li>
-              <li className="flex items-start">
+                <span className="group-hover:text-white transition-colors">
+                  support@medilink.com
+                </span>
+              </motion.li>
+              <motion.li
+                className="flex items-start group"
+                whileHover={{ x: 5 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
                 <svg
-                  className="w-5 h-5 mr-2 mt-0.5 text-blue-300"
+                  className="w-5 h-5 mr-2 mt-0.5 text-blue-300 group-hover:text-blue-200 transition-colors"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -234,23 +264,45 @@ export default function PageFooter() {
                     d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
                   />
                 </svg>
-                +1 (555) 123-4567
-              </li>
+                <span className="group-hover:text-white transition-colors">
+                  +1 (555) 123-4567
+                </span>
+              </motion.li>
             </motion.ul>
           </div>
         </div>
 
         {/* Bottom bar */}
         <motion.div
-          className="mt-8 pt-6 border-t border-blue-800/30 text-center text-blue-200 text-sm"
+          className="mt-8 pt-6 border-t border-blue-800/30 text-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7 }}
         >
-          <p>© {currentYear} Medi-Link. All rights reserved.</p>
-          <p className="mt-1 text-blue-300/70">
-            Designed with ❤️ for better healthcare
-          </p>
+          <motion.p
+            className="text-blue-200 text-xs"
+            initial={{ y: 10 }}
+            animate={{ y: 0 }}
+            transition={{ delay: 0.8 }}
+          >
+            © {currentYear} Medi-Link. All rights reserved.
+          </motion.p>
+          <motion.p
+            className="mt-1 text-blue-300/70 text-xs flex items-center justify-center space-x-1"
+            initial={{ y: 10 }}
+            animate={{ y: 0 }}
+            transition={{ delay: 0.9 }}
+          >
+            <span>Designed with</span>
+            <motion.span
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 1, repeat: Infinity }}
+              className="text-red-400"
+            >
+              ❤️
+            </motion.span>
+            <span>for better healthcare</span>
+          </motion.p>
         </motion.div>
       </div>
     </motion.footer>
