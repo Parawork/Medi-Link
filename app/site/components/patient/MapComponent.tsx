@@ -473,14 +473,27 @@ const MapComponent: React.FC<MapComponentProps> = ({
   useEffect(() => {
     if (!mapRef.current || !latitude || !longitude) return;
 
+    // Create a variable to track if the component is mounted
+    let isMounted = true;
+
     // Workaround for SSR and Leaflet compatibility
-    if (typeof window !== "undefined") {
+    if (typeof window === "undefined") return;
+
+    // Make sure Leaflet is available
+    if (!L || !L.map) {
+      console.error("Leaflet is not available");
+      return;
+    }
+
+    try {
       // Create map instance
       const map = L.map(mapRef.current, {
         zoomControl: false,
       }).setView([latitude, longitude], size);
 
-      setMapInstance(map);
+      if (isMounted) {
+        setMapInstance(map);
+      }
 
       // Add tile layer
       L.tileLayer(
@@ -510,38 +523,72 @@ const MapComponent: React.FC<MapComponentProps> = ({
       (userMarker as any)._isUserMarker = true;
       userMarker.openPopup();
 
-      // Add pharmacy markers
-      if (pharmacies.length > 0) {
-        addPharmacyMarkers(map);
-      }
+      // Wait for map to be ready
+      map.whenReady(() => {
+        if (!isMounted) return;
+
+        // Add pharmacy markers only after map is fully ready
+        if (
+          pharmacies.length > 0 &&
+          map.getContainer() &&
+          map.getPane("markerPane")
+        ) {
+          // Direct check with try/catch
+          try {
+            // Use a small delay to ensure map is fully initialized
+            setTimeout(() => {
+              if (
+                isMounted &&
+                map.getContainer() &&
+                map.getPane("markerPane")
+              ) {
+                addMarkersToMap(map);
+              }
+            }, 100);
+          } catch (error) {
+            console.error("Error adding markers on initial load:", error);
+          }
+        }
+      });
 
       // Cleanup
       return () => {
-        map.remove();
+        isMounted = false;
+        try {
+          if (map) {
+            map.remove();
+          }
+        } catch (e) {
+          console.error("Error removing map:", e);
+        }
         setMapInstance(null);
       };
+    } catch (error) {
+      console.error("Error initializing map:", error);
     }
   }, [latitude, longitude, size]);
 
-  // Function to add pharmacy markers to map
-  const addPharmacyMarkers = useCallback(
-    (map: L.Map | null) => {
-      if (!map || pharmacies.length === 0) return;
+  // Function to add markers directly to the map
+  const addMarkersToMap = (map: L.Map) => {
+    if (!map || pharmacies.length === 0) return;
 
-      // Check if the map is properly initialized
-      try {
-        // This will throw an error if the map isn't properly initialized
-        if (!map.getContainer()) return;
+    try {
+      // Make sure the map container exists and is properly initialized
+      if (!map.getContainer() || !map.getPane("markerPane")) {
+        console.warn("Map container or marker pane not ready yet");
+        return;
+      }
 
-        // Clear existing markers
-        map.eachLayer((layer) => {
-          if (layer instanceof L.Marker && !(layer as any)._isUserMarker) {
-            map.removeLayer(layer);
-          }
-        });
+      // Clear existing markers
+      map.eachLayer((layer) => {
+        if (layer instanceof L.Marker && !(layer as any)._isUserMarker) {
+          map.removeLayer(layer);
+        }
+      });
 
-        // Add new markers
-        pharmacies.forEach((pharmacy) => {
+      // Add new markers
+      pharmacies.forEach((pharmacy) => {
+        try {
           const pharmacyIcon = L.divIcon({
             html: `<div class="bg-white rounded-full h-9 w-9 flex items-center justify-center shadow-md text-2xl">💊</div>`,
             className: "pharmacy-icon",
@@ -551,8 +598,22 @@ const MapComponent: React.FC<MapComponentProps> = ({
           const lat = pharmacy.geoLocation?.latitude ?? latitude;
           const lng = pharmacy.geoLocation?.longitude ?? longitude;
 
-          try {
-            L.marker([lat, lng], { icon: pharmacyIcon })
+          if (
+            typeof lat !== "number" ||
+            typeof lng !== "number" ||
+            isNaN(lat) ||
+            isNaN(lng)
+          ) {
+            console.error("Invalid coordinates for pharmacy:", pharmacy);
+            return;
+          }
+
+          // Create marker but don't add it to the map yet
+          const marker = L.marker([lat, lng], { icon: pharmacyIcon });
+
+          // Only add to map if the map is still valid
+          if (map && map.getContainer() && map.getPane("markerPane")) {
+            marker
               .addTo(map)
               .bindPopup(
                 `
@@ -570,14 +631,47 @@ const MapComponent: React.FC<MapComponentProps> = ({
               .on("click", () => {
                 setSelectedPharmacy(pharmacy);
               });
-          } catch (error) {
-            console.error("Error adding marker:", error);
+          } else {
+            console.warn("Map not ready for marker addition");
           }
-        });
-      } catch (error) {
-        console.error("Map is not fully initialized:", error);
+        } catch (markerError) {
+          console.error(
+            "Error creating marker for pharmacy:",
+            pharmacy,
+            markerError
+          );
+        }
+      });
+    } catch (error) {
+      console.error("Error in addMarkersToMap:", error);
+    }
+  };
+
+  // Function to add pharmacy markers to map - safer callback version
+  const addPharmacyMarkers = useCallback(
+    (map: L.Map | null) => {
+      if (!map) return;
+
+      // Check if map is fully initialized
+      if (!map.getContainer() || !map.getPane("markerPane")) {
+        console.warn("Map not fully initialized yet, waiting...");
+        // Try again after a short delay
+        setTimeout(() => addPharmacyMarkers(map), 100);
         return;
       }
+
+      // Delay marker addition to ensure map is ready
+      setTimeout(() => {
+        try {
+          if (map && map.getContainer() && map.getPane("markerPane")) {
+            addMarkersToMap(map);
+          } else {
+            console.warn("Map not ready for markers after delay");
+          }
+        } catch (error) {
+          console.error("Error in delayed addPharmacyMarkers:", error);
+        }
+      }, 300); // Increased delay to ensure map is fully initialized
     },
     [pharmacies, latitude, longitude]
   );
@@ -585,16 +679,26 @@ const MapComponent: React.FC<MapComponentProps> = ({
   // Update markers when pharmacies change
   useEffect(() => {
     if (mapInstance && pharmacies.length > 0) {
-      // Use a small delay to ensure the map is fully initialized
+      // Use a longer delay to ensure the map is fully initialized
       const timer = setTimeout(() => {
-        try {
-          if (mapInstance && mapInstance.getContainer()) {
-            addPharmacyMarkers(mapInstance);
+        if (mapInstance) {
+          try {
+            // Check if map is fully initialized before adding markers
+            if (
+              mapInstance.getContainer() &&
+              mapInstance.getPane("markerPane")
+            ) {
+              addPharmacyMarkers(mapInstance);
+            } else {
+              console.warn("Map not fully initialized, retrying...");
+              // Try again after a short delay
+              setTimeout(() => addPharmacyMarkers(mapInstance), 200);
+            }
+          } catch (error) {
+            console.error("Failed to add pharmacy markers:", error);
           }
-        } catch (error) {
-          console.error("Map not ready for markers:", error);
         }
-      }, 100);
+      }, 500); // Increased delay to ensure map is fully initialized
 
       return () => clearTimeout(timer);
     }
