@@ -1,4 +1,3 @@
-// components/PharmacyCard.tsx
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Phone, ArrowRight } from "lucide-react";
