@@ -46,7 +46,7 @@ export default function PharmacyCard({ pharmacy }: { pharmacy: any }) {
           href={`/site/patient/uploadPrescription/${pharmacy.id}`}
           className="text-sm font-medium text-blue-900 flex items-center justify-between group"
         >
-          <span>View Pharmacy</span>
+          <span>Upload Prescription</span>
           <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
         </Link>
       </div>
