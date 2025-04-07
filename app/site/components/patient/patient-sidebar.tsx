@@ -16,10 +16,33 @@ import {
 import { handleSignOut } from "./signOutAction";
 import { useRouter } from "next/navigation";
 
-export default function Sidebar() {
+
+interface SidebarProps {
+  collapsed: boolean;
+  setCollapsed: (collapsed: boolean) => void;
+}
+
+export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
+
+  // New effect to handle screen size changes
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) { // Adjust the width as needed
+        setCollapsed(true);
+      } else {
+        setCollapsed(false); // Optional: Expand when screen is larger
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Call on mount to set initial state
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [setCollapsed]);
 
   const isActive = (path: string) => {
     return pathname === path;
@@ -31,9 +54,9 @@ export default function Sidebar() {
 
   return (
     <div
-      className={`${
+      className={`fixed top-0 left-0 h-screen ${
         collapsed ? "w-16" : "w-64"
-      } bg-gradient-to-b from-gray-50 to-gray-45 border-r border-gray-200 shadow-sm flex-shrink-0 transition-all duration-300 h-screen`}
+      } bg-gradient-to-b from-gray-50 to-gray-45 border-r border-gray-200 shadow-sm flex-shrink-0 transition-all duration-300 z-20`}
     >
       <div className="h-16 bg-gradient-to-r from-[#0a2351] to-[#1e3a6a] flex items-center justify-between px-4 shadow-md">
         {!collapsed && (
@@ -53,7 +76,7 @@ export default function Sidebar() {
         </button>
       </div>
 
-      <nav className="p-3 space-y-1 mt-2">
+      <nav className="p-3 space-y-1 mt-2 overflow-y-auto h-[calc(100vh-64px)]">
         <NavItem
           href="/site/patient"
           icon={<Home size={18} />}
