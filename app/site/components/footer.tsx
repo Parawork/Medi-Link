@@ -243,7 +243,7 @@ export default function PageFooter() {
                   />
                 </svg>
                 <span className="group-hover:text-white transition-colors">
-                  parakrama@medilink.com
+                  support@medilink.com
                 </span>
               </motion.li>
               <motion.li
@@ -265,7 +265,7 @@ export default function PageFooter() {
                   />
                 </svg>
                 <span className="group-hover:text-white transition-colors">
-                  +94 70 406-4244
+                  +94 70 406 4244
                 </span>
               </motion.li>
             </motion.ul>

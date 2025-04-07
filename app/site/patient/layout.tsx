@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import Footer from "@/components/footer";
+import Footer from "../components/footer";
 import { LogOut, Menu, User2 } from "lucide-react";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import {
