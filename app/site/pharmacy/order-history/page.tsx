@@ -97,7 +97,9 @@ export default async function PharmacyPrescriptionsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold mb-6">Manage Prescriptions</h1>
+        <h1 className="text-3xl font-semibold tracking-tight mb-6">
+          Manage Prescriptions
+        </h1>
         <Link href="/site/pharmacy/orders">
           <Button>View All Orders</Button>
         </Link>
@@ -107,12 +109,12 @@ export default async function PharmacyPrescriptionsPage() {
         {prescriptions.map((prescription) => (
           <div
             key={prescription.id}
-            className="flex flex-col bg-blue-100 h-[180px] rounded-3xl py-5 px-7 gap-4"
+            className="flex flex-col bg-gray-50 h-[180px] rounded-3xl py-5 px-7 gap-4"
           >
             {/* Card Header */}
             <div className="flex items-center justify-between px-3">
-              <div className="text-lg font-bold">
-                Prescription for {prescription.patient.fullName}
+              <div className="text-lg tracking-tighter font-semibold">
+                Prescription : {prescription.patient.fullName}
               </div>
               <div className="text-sm">
                 {formatPrescriptionDate(prescription.createdAt)}
@@ -132,23 +134,25 @@ export default async function PharmacyPrescriptionsPage() {
               </div>
 
               {/* Action buttons */}
-              <div className="flex gap-8 items-center">
+              <div className="flex flex-col sm:flex-row gap-3 items-center">
                 {hasOrder(prescription.id) ? (
                   <>
-                    <Button variant="outline" disabled>
+                    <div className="px-4 py-2 rounded-full bg-green-50 text-green-900 ring-1 ring-green-900 text-sm font-bold tracking-tighter">
                       Order Completed
-                    </Button>
+                    </div>
                     <Link
                       href={`/site/pharmacy/orders/${prescription.Order[0].id}`}
+                      className="px-4 py-2 rounded-full bg-white text-blue-900 ring-1 ring-blue-900 text-sm tracking-tighter hover:bg-blue-900 hover:text-white"
                     >
-                      <Button>View Order</Button>
+                      View Order
                     </Link>
                   </>
                 ) : (
                   <Link
                     href={`/site/pharmacy/order-history/${prescription.id}`}
+                    className="px-4 py-2 rounded-full bg-white text-blue-900 ring-1 ring-blue-900 text-sm tracking-tighter hover:bg-blue-900 hover:text-white"
                   >
-                    <Button>Create Order</Button>
+                    Create Order
                   </Link>
                 )}
               </div>
