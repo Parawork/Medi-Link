@@ -111,6 +111,7 @@ export default async function PatientOderHistory() {
                             <h3 className="font-medium">
                               {order.pharmacy.name}
                             </h3>
+
                             <p className="text-sm text-gray-500">
                               {order.createdAt.toLocaleDateString("en-US")}
                             </p>

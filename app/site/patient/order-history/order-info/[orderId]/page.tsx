@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ChevronLeft, MessageSquare, Download } from "lucide-react";
 import { Button } from "@/components/ui/button"; // Adjust the path based on your project structure
+import { UpdateOrderStatusForm } from "@/app/site/components/patient/UpdateOrderStatusForm";
 
 export default async function OrderInfoPage({
   params,
@@ -129,14 +130,7 @@ export default async function OrderInfoPage({
                   View Prescription
                 </Button>
               </Link>
-              <form
-                action={`/api/patient/updateOrderStatus/${order.id}`}
-                method="POST"
-              >
-                <button className="flex items-center text-center px-2 py-1 bg-white ring-1 rounded-full text-red-700 hover:bg-red-700 hover:text-white text-sm font-normal ring-red-700 tracking-tighter">
-                  Make Payment
-                </button>
-              </form>
+              <UpdateOrderStatusForm orderId={order.id} />
             </div>
           </div>
         </div>
