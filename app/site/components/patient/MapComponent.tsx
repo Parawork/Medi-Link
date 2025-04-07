@@ -480,6 +480,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
         zoomControl: false,
       }).setView([latitude, longitude], size);
 
+      setMapInstance(map);
+
       // Add tile layer
       L.tileLayer(
         "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
@@ -508,10 +510,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
       (userMarker as any)._isUserMarker = true;
       userMarker.openPopup();
 
-      // Set map instance after initialization
-      setMapInstance(map);
-
-      // Add pharmacy markers after map is initialized
+      // Add pharmacy markers
       if (pharmacies.length > 0) {
         addPharmacyMarkers(map);
       }
@@ -526,8 +525,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
   // Function to add pharmacy markers to map
   const addPharmacyMarkers = useCallback(
-    (map: L.Map) => {
-      if (!map || pharmacies.length === 0) return;
+    (map: L.Map | null) => {
+      if (!map || !map._container || pharmacies.length === 0) return;
 
       // Clear existing markers
       map.eachLayer((layer) => {
@@ -538,45 +537,53 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
       // Add new markers
       pharmacies.forEach((pharmacy) => {
-        if (!pharmacy.geoLocation?.latitude || !pharmacy.geoLocation?.longitude)
-          return;
-
         const pharmacyIcon = L.divIcon({
           html: `<div class="bg-white rounded-full h-9 w-9 flex items-center justify-center shadow-md text-2xl">💊</div>`,
           className: "pharmacy-icon",
           iconSize: [36, 36],
         });
 
-        const lat = pharmacy.geoLocation.latitude;
-        const lng = pharmacy.geoLocation.longitude;
+        const lat = pharmacy.geoLocation?.latitude ?? latitude;
+        const lng = pharmacy.geoLocation?.longitude ?? longitude;
 
-        L.marker([lat, lng], { icon: pharmacyIcon })
-          .addTo(map)
-          .bindPopup(
-            `
-          <div class="font-sans">
-            <div class="font-semibold text-base mb-1">${pharmacy.name}</div>
-            <div class="text-sm text-gray-600 mb-1.5">${formatAddress(
-              pharmacy
-            )}</div>
-            <div class="text-sm text-[#4285F4] font-medium">${
-              pharmacy.distance
-            } away</div>
-          </div>
-        `
-          )
-          .on("click", () => {
-            setSelectedPharmacy(pharmacy);
-          });
+        try {
+          L.marker([lat, lng], { icon: pharmacyIcon })
+            .addTo(map)
+            .bindPopup(
+              `
+            <div class="font-sans">
+              <div class="font-semibold text-base mb-1">${pharmacy.name}</div>
+              <div class="text-sm text-gray-600 mb-1.5">${formatAddress(
+                pharmacy
+              )}</div>
+              <div class="text-sm text-[#4285F4] font-medium">${
+                pharmacy.distance
+              } away</div>
+            </div>
+          `
+            )
+            .on("click", () => {
+              setSelectedPharmacy(pharmacy);
+            });
+        } catch (error) {
+          console.error("Error adding marker:", error);
+        }
       });
     },
-    [pharmacies]
+    [pharmacies, latitude, longitude]
   );
 
   // Update markers when pharmacies change
   useEffect(() => {
     if (mapInstance && pharmacies.length > 0) {
-      addPharmacyMarkers(mapInstance);
+      // Use a small delay to ensure the map is fully initialized
+      const timer = setTimeout(() => {
+        if (mapInstance && mapInstance._container) {
+          addPharmacyMarkers(mapInstance);
+        }
+      }, 100);
+
+      return () => clearTimeout(timer);
     }
   }, [mapInstance, pharmacies, addPharmacyMarkers]);
 
