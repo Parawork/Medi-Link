@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="800" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Pulse -->
+  <circle cx="400" cy="400" r="350" fill="url(#pulse-gradient)" opacity="0.3">
+    <animate attributeName="r" values="350;370;350" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.3;0.5;0.3" dur="2s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Medical Cross with Pulse -->
+  <g transform="translate(400, 400)">
+    <rect x="-40" y="-120" width="80" height="240" rx="20" fill="url(#neon-blue)" opacity="0.9">
+      <animate attributeName="opacity" values="0.9;0.6;0.9" dur="1.5s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="-120" y="-40" width="240" height="80" rx="20" fill="url(#neon-blue)" opacity="0.9">
+      <animate attributeName="opacity" values="0.9;0.6;0.9" dur="1.5s" repeatCount="indefinite"/>
+    </rect>
+  </g>
+
+  <!-- Rotating Pills -->
+  <g transform="translate(400, 400)">
+    <!-- Pill 1 -->
+    <g>
+      <rect x="-30" y="-200" width="60" height="25" rx="12.5" fill="url(#pill-gradient-1)">
+        <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="8s" repeatCount="indefinite"/>
+      </rect>
+      <line x1="-15" y1="-187.5" x2="15" y2="-187.5" stroke="white" stroke-width="2">
+        <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="8s" repeatCount="indefinite"/>
+      </line>
+    </g>
+    <!-- Pill 2 -->
+    <g>
+      <rect x="170" y="-30" width="60" height="25" rx="12.5" fill="url(#pill-gradient-2)">
+        <animateTransform attributeName="transform" type="rotate" from="120 0 0" to="480 0 0" dur="8s" repeatCount="indefinite"/>
+      </rect>
+      <line x1="185" y1="-17.5" x2="215" y2="-17.5" stroke="white" stroke-width="2">
+        <animateTransform attributeName="transform" type="rotate" from="120 0 0" to="480 0 0" dur="8s" repeatCount="indefinite"/>
+      </line>
+    </g>
+    <!-- Pill 3 -->
+    <g>
+      <rect x="-200" y="-30" width="60" height="25" rx="12.5" fill="url(#pill-gradient-3)">
+        <animateTransform attributeName="transform" type="rotate" from="240 0 0" to="600 0 0" dur="8s" repeatCount="indefinite"/>
+      </rect>
+      <line x1="-185" y1="-17.5" x2="-155" y2="-17.5" stroke="white" stroke-width="2">
+        <animateTransform attributeName="transform" type="rotate" from="240 0 0" to="600 0 0" dur="8s" repeatCount="indefinite"/>
+      </line>
+    </g>
+  </g>
+
+  <!-- DNA Helix -->
+  <g transform="translate(400, 400)" opacity="0.7">
+    <path d="M-150,0 Q-75,-100 0,0 T150,0" stroke="url(#dna-gradient-1)" stroke-width="3" fill="none">
+      <animate attributeName="d" dur="3s" repeatCount="indefinite"
+        values="M-150,0 Q-75,-100 0,0 T150,0;
+                M-150,0 Q-75,100 0,0 T150,0;
+                M-150,0 Q-75,-100 0,0 T150,0"/>
+    </path>
+    <path d="M-150,20 Q-75,120 0,20 T150,20" stroke="url(#dna-gradient-2)" stroke-width="3" fill="none">
+      <animate attributeName="d" dur="3s" repeatCount="indefinite"
+        values="M-150,20 Q-75,120 0,20 T150,20;
+                M-150,20 Q-75,-80 0,20 T150,20;
+                M-150,20 Q-75,120 0,20 T150,20"/>
+    </path>
+  </g>
+
+  <!-- Heartbeat Line -->
+  <path d="M200,600 L300,600 L350,500 L400,700 L450,500 L500,600 L600,600" 
+        stroke="url(#heartbeat-gradient)" 
+        stroke-width="4"
+        fill="none"
+        stroke-linecap="round">
+    <animate attributeName="opacity" values="1;0.5;1" dur="1s" repeatCount="indefinite"/>
+  </path>
+
+  <!-- Scanning Circle -->
+  <circle cx="400" cy="400" r="300" stroke="url(#scan-gradient)" stroke-width="2" fill="none">
+    <animate attributeName="stroke-dasharray" from="0,2000" to="2000,0" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.2;0.5;0.2" dur="3s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Gradients -->
+  <defs>
+    <!-- Pulse Gradient -->
+    <linearGradient id="pulse-gradient" x1="0" y1="0" x2="800" y2="800">
+      <stop offset="0%" stop-color="#E1F5FE"/>
+      <stop offset="100%" stop-color="#B3E5FC"/>
+    </linearGradient>
+
+    <!-- Neon Blue -->
+    <linearGradient id="neon-blue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4FC3F7"/>
+      <stop offset="100%" stop-color="#03A9F4"/>
+    </linearGradient>
+
+    <!-- Pill Gradients -->
+    <linearGradient id="pill-gradient-1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#29B6F6"/>
+      <stop offset="100%" stop-color="#0288D1"/>
+    </linearGradient>
+    <linearGradient id="pill-gradient-2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#26C6DA"/>
+      <stop offset="100%" stop-color="#00ACC1"/>
+    </linearGradient>
+    <linearGradient id="pill-gradient-3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4DD0E1"/>
+      <stop offset="100%" stop-color="#00BCD4"/>
+    </linearGradient>
+
+    <!-- DNA Gradients -->
+    <linearGradient id="dna-gradient-1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4FC3F7"/>
+      <stop offset="100%" stop-color="#03A9F4"/>
+    </linearGradient>
+    <linearGradient id="dna-gradient-2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#29B6F6"/>
+      <stop offset="100%" stop-color="#0288D1"/>
+    </linearGradient>
+
+    <!-- Heartbeat Gradient -->
+    <linearGradient id="heartbeat-gradient" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4FC3F7"/>
+      <stop offset="100%" stop-color="#03A9F4"/>
+    </linearGradient>
+
+    <!-- Scan Gradient -->
+    <linearGradient id="scan-gradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#B3E5FC"/>
+      <stop offset="100%" stop-color="#03A9F4"/>
+    </linearGradient>
+  </defs>
+</svg> 
