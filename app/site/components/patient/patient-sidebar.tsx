@@ -105,7 +105,7 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
           href="/site/patient/updateProfile"
           icon={<User size={18} />}
           label="User Profile"
-          isActive={isActive("/site/patient/profile")}
+          isActive={isActive("/site/patient/updateProfile")}
           collapsed={collapsed}
         />
 

@@ -84,7 +84,7 @@ export default function PharmacySidebar({ collapsed, setCollapsed }: SidebarProp
           href="/site/pharmacy/updateProfile"
           icon={<User size={18} />}
           label="User Profile"
-          isActive={isActive("/site/pharmacy/profile")}
+          isActive={isActive("/site/pharmacy/updateProfile")}
           collapsed={collapsed}
         />
 
