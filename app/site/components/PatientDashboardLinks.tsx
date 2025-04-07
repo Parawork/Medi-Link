@@ -11,38 +11,44 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export const pharmacyDashboardLinks = [
+export const patientDashboardLinks = [
   {
     id: 0,
     name: "Home",
-    href: "/site/pharmacy",
+    href: "/site/patient",
     icon: HomeIcon,
   },
   {
     id: 1,
-    name: "Order History",
-    href: "/site/pharmacy/order-history",
-    icon: Users2,
+    name: "Locate Pharmacies",
+    href: "/site/patient/locate-pharmacies",
+    icon: HomeIcon,
   },
   {
     id: 2,
+    name: "Order History",
+    href: "/site/patient/order-history",
+    icon: Users2,
+  },
+  {
+    id: 3,
     name: "User Profile",
-    href: "/site/pharmacy/updateProfile",
+    href: "/site/patient/updateProfile",
     icon: Receipt,
   },
 ];
 
-export function PharmacyDashboardLinks() {
+export function PatientDashboardLinks() {
   const pathname = usePathname();
 
   return (
     <>
-      {pharmacyDashboardLinks.map((link) => (
+      {patientDashboardLinks.map((link) => (
         <Link
           key={link.id}
           href={link.href}
           className={cn(
-            link.href === "/site/pharmacy"
+            link.href === "/site/patient"
               ? pathname === link.href
                 ? "text-primary bg-primary/10"
                 : "text-muted-foreground hover:text-foreground"

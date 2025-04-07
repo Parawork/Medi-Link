@@ -19,9 +19,10 @@ import {
 import { prisma } from "@/app/utils/db";
 import { requireUser } from "@/lib/requireUser";
 import { signOut } from "@/lib/auth";
-import { DashboardLinks } from "../components/PharmacyDashboardLinks";
+
 import { cn } from "@/lib/utils";
 import { handleSignOut } from "../components/patient/signOutAction";
+import { PharmacyDashboardLinks } from "../components/PharmacyDashboardLinks";
 
 export default async function DashboardLayout({
   children,
@@ -45,7 +46,7 @@ export default async function DashboardLayout({
             </div>
             <div className="flex-1 ">
               <nav className="px-3 mt-3">
-                <DashboardLinks />
+                <PharmacyDashboardLinks />
                 <div className="w-full hover:bg-red-100 rounded-lg">
                   <form action={handleSignOut}>
                     <button type="submit">
@@ -75,7 +76,7 @@ export default async function DashboardLayout({
               <SheetContent side="left">
                 <DialogTitle> </DialogTitle>
                 <nav className="grid gap-2 mt-10 mx-6">
-                  <DashboardLinks />
+                  <PharmacyDashboardLinks />
                   <div className="w-full hover:bg-red-100 rounded-lg">
                     <form action={handleSignOut}>
                       <button type="submit">
