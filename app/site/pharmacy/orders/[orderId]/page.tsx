@@ -84,9 +84,9 @@ export default async function SingleOrderPage({
               Back to Orders
             </Button>
           </form>
-          <form action={`/site/pharmacy/orders/${orderId}/update`}>
+          {/* <form action={`/site/pharmacy/orders/${orderId}/update`}>
             <Button type="submit">Update Status</Button>
-          </form>
+          </form> */}
         </div>
       </div>
 
