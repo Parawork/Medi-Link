@@ -22,8 +22,9 @@ export function UpdateOrderStatusForm({ orderId }: { orderId: string }) {
 
       const data = await response.json();
 
-      if (data.success && data.redirectUrl) {
+      if (data.success) {
         router.push("/site/patient/order-history");
+        router.refresh();
       }
     } catch (error) {
       console.error("Submission error:", error);
