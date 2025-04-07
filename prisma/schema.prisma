@@ -120,8 +120,15 @@ model Pharmacy {
   licenseNumber String         @unique
   licenseFile   String?
   verified      Boolean        @default(false)
+  quality       Quality        @default(MEDIUM)
   Prescription  Prescription[]
   availability  Availability[]
+}
+
+enum Quality {
+  LOW
+  MEDIUM
+  HIGH
 }
 
 model Prescription {

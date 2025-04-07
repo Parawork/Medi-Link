@@ -14,10 +14,19 @@ export async function GET() {
         country: true,
         phone: true,
         verified: true,
+        quality: true,
         geoLocation: {
           select: {
             latitude: true,
             longitude: true,
+          },
+        },
+        availability: {
+          select: {
+            dayOfWeek: true,
+            openTime: true,
+            closeTime: true,
+            isOpen: true,
           },
         },
       },
