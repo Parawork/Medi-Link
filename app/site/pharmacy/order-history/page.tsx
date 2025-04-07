@@ -74,17 +74,13 @@ export default async function PharmacyPrescriptionsPage({
     }),
   ]);
 
-  // Sort the prescriptions after fetching
-  // Prescriptions with NO orders first, then by creation date
   const sortedPrescriptions = prescriptions.sort((a, b) => {
-    // Check if prescription has any orders
     const aHasOrders = a.Order.length > 0;
     const bHasOrders = b.Order.length > 0;
 
-    if (!aHasOrders && bHasOrders) return -1; // A has no orders, B has orders, so A comes first
-    if (aHasOrders && !bHasOrders) return 1; // A has orders, B has no orders, so B comes first
+    if (!aHasOrders && bHasOrders) return -1;
+    if (aHasOrders && !bHasOrders) return 1;
 
-    // If both have the same order status (both have orders or both don't have orders), sort by creation date (desc)
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
