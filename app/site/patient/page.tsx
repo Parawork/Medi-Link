@@ -1,12 +1,12 @@
 // app/customer/dashboard/page.tsx (or wherever your route is)
-import Image from "next/image";
-import Link from "next/link";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import Sidebar from "@/components/sidebar";
-import { requireUser } from "@/lib/requireUser";
-import { prisma } from "@/app/utils/db";
+import Image from "next/image"
+import Link from "next/link"
+import { Search, ChevronLeft, ChevronRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { requireUser } from "@/lib/requireUser"
+import { prisma } from "@/app/utils/db"
+
+
 
 export default async function CustomerDashboard() {
   const user = await requireUser("PATIENT"); // runs server-side
@@ -35,23 +35,20 @@ export default async function CustomerDashboard() {
 
   return (
     <div className="flex min-h-screen bg-white">
-      <main className="flex-1 p-6">
-        <div className="flex justify-center gap-4 mb-8">
-          <Link href="/locate-pharmacies">
-            <Button className="bg-[#0a2351] hover:bg-[#0a2351]/90 text-white">
-              <Search className="mr-2 h-4 w-4" />
-              Pharmacies Near Me
-            </Button>
-          </Link>
-          <Link href="/track-orders">
-            <Button
-              variant="outline"
-              className="border-[#0a2351] text-[#0a2351]"
-            >
-              Track Orders
-            </Button>
-          </Link>
-        </div>
+        <main className="flex-1 p-6">
+          <div className="flex justify-center gap-4 mb-8">
+            <Link href="/locate-pharmacies">
+              <Button className="bg-[#0a2351] hover:bg-[#0a2351]/90 text-white">
+                <Search className="mr-2 h-4 w-4" />
+                Pharmacies Near Me
+              </Button>
+            </Link>
+            <Link href={`/site/patient/track-order/`}>
+              <Button variant="outline" className="border-[#0a2351] text-[#0a2351]">
+                Track Orders
+              </Button>
+            </Link>
+          </div>
 
         <div className="max-w-3xl mx-auto">
           <h2 className="text-xl font-semibold mb-4">Recent Orders</h2>
