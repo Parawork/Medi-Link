@@ -38,7 +38,7 @@ export default async function CustomerDashboard() {
     <div className="flex min-h-screen bg-white">
       <main className="flex-1 p-6">
         <div className="flex justify-center gap-4 mb-8">
-          <Link href="/locate-pharmacies">
+          <Link href="/site/patient/locate-pharmacies">
             <Button className="bg-[#0a2351] hover:bg-[#0a2351]/90 text-white">
               <Search className="mr-2 h-4 w-4" />
               Pharmacies Near Me
