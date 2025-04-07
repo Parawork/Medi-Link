@@ -128,7 +128,7 @@ export default async function PharmacyPrescriptionsPage({
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
         <h1 className="text-3xl font-semibold tracking-tight mb-6">
           Manage Prescriptions
         </h1>
@@ -142,21 +142,20 @@ export default async function PharmacyPrescriptionsPage({
           prescriptions.map((prescription) => (
             <div
               key={prescription.id}
-              className="flex flex-col bg-gray-50 h-[180px] rounded-3xl py-5 px-7 gap-4"
+              className="flex flex-col bg-gray-50 rounded-3xl py-4 px-4 md:py-5 md:px-7 gap-3 md:gap-4"
             >
               {/* Card Header */}
-              <div className="flex items-center justify-between px-3">
-                <div className="text-lg tracking-tighter font-light">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between px-2 md:px-3">
+                <div className="text-base md:text-lg tracking-tighter font-light">
                   Prescription : {prescription.patient.fullName}
                 </div>
-                <div className="text-sm">
+                <div className="text-xs md:text-sm">
                   {formatPrescriptionDate(prescription.createdAt)}
                 </div>
               </div>
-
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 {/* Prescription thumbnail */}
-                <div className="h-[70px] w-[150px] relative rounded-xl bg-white/20">
+                <div className="h-[60px] w-[130px] md:h-[70px] md:w-[150px] relative rounded-xl bg-white/20">
                   <Image
                     src={prescription.fileUrl}
                     alt={`Prescription for ${prescription.patient.fullName}`}
@@ -165,17 +164,16 @@ export default async function PharmacyPrescriptionsPage({
                     priority
                   />
                 </div>
-
                 {/* Action buttons */}
-                <div className="flex flex-col sm:flex-row gap-3 items-center">
+                <div className="flex flex-col sm:flex-row gap-2 md:gap-3 items-center w-full sm:w-auto">
                   {hasOrder(prescription.id) ? (
                     <>
-                      <div className="px-4 py-2 rounded-full bg-green-50 text-green-900 ring-1 ring-green-900 text-sm font-bold tracking-tighter">
+                      <div className="w-full sm:w-auto px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-green-50 text-green-900 ring-1 ring-green-900 text-xs md:text-sm font-bold tracking-tighter text-center">
                         Order Completed
                       </div>
                       <Link
                         href={`/site/pharmacy/orders/${prescription.Order[0].id}`}
-                        className="px-4 py-2 rounded-full bg-white text-blue-900 ring-1 ring-blue-900 text-sm tracking-tighter hover:bg-blue-900 hover:text-white"
+                        className="w-full sm:w-auto px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-white text-blue-900 ring-1 ring-blue-900 text-xs md:text-sm tracking-tighter hover:bg-blue-900 hover:text-white text-center"
                       >
                         View Order
                       </Link>
@@ -183,15 +181,14 @@ export default async function PharmacyPrescriptionsPage({
                   ) : (
                     <Link
                       href={`/site/pharmacy/order-history/${prescription.id}`}
-                      className="px-4 py-2 rounded-full bg-white text-blue-900 ring-1 ring-blue-900 text-sm tracking-tighter hover:bg-blue-900 hover:text-white"
+                      className="w-full sm:w-auto px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-white text-blue-900 ring-1 ring-blue-900 text-xs md:text-sm tracking-tighter hover:bg-blue-900 hover:text-white text-center"
                     >
                       Create Order
                     </Link>
                   )}
                 </div>
-
                 {/* Patient avatar */}
-                <div className="size-[70px] relative rounded-full bg-white/20">
+                <div className="size-[60px] md:size-[70px] relative rounded-full bg-white/20 order-first sm:order-last">
                   <Image
                     src={prescription.patient.avatar || "/images/noAvatar.png"}
                     alt={`${prescription.patient.fullName}'s avatar`}
@@ -204,12 +201,12 @@ export default async function PharmacyPrescriptionsPage({
             </div>
           ))
         ) : (
-          <div className="text-center py-12 text-gray-500">
-            <div className="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+          <div className="text-center py-8 md:py-12 text-gray-500">
+            <div className="mx-auto w-12 h-12 md:w-16 md:h-16 rounded-full bg-gray-100 flex items-center justify-center mb-3 md:mb-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
+                width="20"
+                height="20"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -223,8 +220,10 @@ export default async function PharmacyPrescriptionsPage({
                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
               </svg>
             </div>
-            <h3 className="text-lg font-medium">No prescriptions found</h3>
-            <p className="text-sm mt-1">
+            <h3 className="text-base md:text-lg font-medium">
+              No prescriptions found
+            </h3>
+            <p className="text-xs md:text-sm mt-1">
               When you have prescriptions, they'll appear here
             </p>
           </div>

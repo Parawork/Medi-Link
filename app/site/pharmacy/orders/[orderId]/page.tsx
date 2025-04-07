@@ -74,14 +74,16 @@ export default async function SingleOrderPage({
     <div className="max-w-6xl mx-auto py-8 px-4">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Order Details</h1>
+          <h1 className="text-lg sm:text-xl md:text-3xl font-bold">
+            Order Details
+          </h1>
           <p className="text-gray-500">Order #{orderId.slice(0, 8)}</p>
         </div>
 
         <div className="flex gap-4">
-          <form action="/site/pharmacy/orders">
+          <form action="/site/pharmacy/order-history">
             <Button variant="outline" type="submit">
-              Back to Orders
+              Back to Prescriptions
             </Button>
           </form>
           {/* <form action={`/site/pharmacy/orders/${orderId}/update`}>
