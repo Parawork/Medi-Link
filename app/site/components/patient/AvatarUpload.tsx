@@ -34,9 +34,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
         sources: ["local", "camera"],
         multiple: false,
         resourceType: "image",
-        cropping: true,
-        croppingAspectRatio: 1,
-        croppingShowDimensions: true,
+        cropping: false,
         showPoweredBy: false,
       }}
     >

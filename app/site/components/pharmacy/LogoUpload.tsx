@@ -36,9 +36,7 @@ const LogoUpload: React.FC<LogoUploadProps> = ({
         sources: ["local", "camera"],
         multiple: false,
         resourceType: "image",
-        cropping: true,
-        croppingAspectRatio: 1,
-        croppingShowDimensions: true,
+        cropping: false,
         showPoweredBy: false,
       }}
     >
