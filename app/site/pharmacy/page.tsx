@@ -1,4 +1,3 @@
-
 import { prisma } from "@/app/utils/db";
 import { requireUser } from "@/lib/requireUser";
 import { format } from "date-fns";
@@ -15,11 +14,8 @@ const formatDate = (date: Date) => {
   });
 };
 
-
 export default async function PharmacyDashboard() {
-
   const user = await requireUser("PHARMACY");
-
 
   const orders = await prisma.order.findMany({
     where: {
@@ -85,7 +81,7 @@ export default async function PharmacyDashboard() {
               {/* Avatar */}
               <div className="w-20 h-20 relative rounded-full overflow-hidden border">
                 <Image
-                  src="/images/today1.jpg"
+                  src={order.Patient?.avatar || "/images/noAvatar.png"}
                   alt={`${order.Patient?.fullName}'s avatar`}
                   fill
                   className="object-cover"
@@ -125,7 +121,5 @@ export default async function PharmacyDashboard() {
         </div>
       </div>
     </div>
-
   );
 }
-

@@ -13,6 +13,7 @@ interface PrescriptionWithPatientAndOrders {
     fullName: string;
     dateOfBirth: Date;
     gender: string | null;
+    avatar: string | null;
   };
   Order: {
     id: string;
@@ -37,6 +38,7 @@ export default async function PharmacyPrescriptionsPage() {
           fullName: true,
           gender: true,
           dateOfBirth: true,
+          avatar: true,
         },
       },
       Order: {
@@ -154,7 +156,7 @@ export default async function PharmacyPrescriptionsPage() {
               {/* Patient avatar */}
               <div className="size-[70px] relative rounded-full bg-white/20">
                 <Image
-                  src="/default-avatar.png"
+                  src={prescription.patient.avatar || "/images/noAvatar.png"}
                   alt={`${prescription.patient.fullName}'s avatar`}
                   fill
                   className="object-cover rounded-full"
