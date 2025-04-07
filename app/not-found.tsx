@@ -18,6 +18,7 @@ export default function NotFound() {
   >([]);
   const [scanHeight, setScanHeight] = useState(0);
   const [pulseSize, setPulseSize] = useState(1);
+  const [timestamp, setTimestamp] = useState<string>("");
 
   // Track mouse movement
   useEffect(() => {
@@ -69,6 +70,11 @@ export default function NotFound() {
       setPulseSize((size) => (size === 1 ? 1.1 : 1));
     }, 1000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Update timestamp after mount
+  useEffect(() => {
+    setTimestamp(new Date().toISOString());
   }, []);
 
   return (
@@ -212,7 +218,7 @@ export default function NotFound() {
             <div className="text-xs uppercase tracking-wider mb-1">
               Timestamp
             </div>
-            <div className="font-medium">{new Date().toISOString()}</div>
+            <div className="font-medium">{timestamp}</div>
           </div>
         </div>
       </div>
