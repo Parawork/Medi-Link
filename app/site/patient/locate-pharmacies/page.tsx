@@ -247,7 +247,7 @@ export default function Page() {
 
         {/* Main content area - cleaner design */}
         <div className="flex-grow mb-6 relative">
-          <div className="rounded-xl overflow-hidden relative h-[150vh]">
+          <div className="rounded-xl overflow-hidden relative h-[110vh]">
             {/* Map View */}
             <div className="absolute inset-0">
               {coordinates.latitude !== null &&

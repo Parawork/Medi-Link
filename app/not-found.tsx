@@ -129,7 +129,7 @@ export default function NotFound() {
         {/* Subtitle with scan effect */}
         <div className="relative mb-12">
           <h2 className="text-4xl font-semibold text-blue-800 mb-4">
-            Prescription Not Found
+            Page Not Found
           </h2>
           <div
             className="h-1 w-full bg-gradient-to-r from-transparent via-blue-400 to-transparent absolute bottom-0 opacity-50"
