@@ -1,13 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
-import {
-  BrainCircuit,
-  Goal,
-  HomeIcon,
-  NotebookText,
-  Receipt,
-  Users2,
-} from "lucide-react";
+import { Clock8, HomeIcon, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -22,13 +15,13 @@ export const pharmacyDashboardLinks = [
     id: 1,
     name: "Order History",
     href: "/site/pharmacy/order-history",
-    icon: Users2,
+    icon: Clock8,
   },
   {
     id: 2,
     name: "User Profile",
     href: "/site/pharmacy/updateProfile",
-    icon: Receipt,
+    icon: User,
   },
 ];
 
