@@ -8,11 +8,21 @@ export default function PageFooter() {
   const currentYear = new Date().getFullYear();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
+  const [windowDimensions, setWindowDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
     };
+
+    // Set window dimensions once we're on the client
+    setWindowDimensions({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
 
     window.addEventListener("mousemove", handleMouseMove);
     setIsVisible(true);
@@ -60,27 +70,28 @@ export default function PageFooter() {
         <div className="absolute w-[200px] h-[200px] top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-purple-400 rounded-full opacity-5 blur-3xl animate-pulse" />
 
         {/* Animated particles */}
-        {Array.from({ length: 20 }).map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-white rounded-full"
-            initial={{
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * 200,
-              opacity: 0.3,
-            }}
-            animate={{
-              y: [null, Math.random() * 200],
-              opacity: [0.3, 0.6, 0.3],
-              scale: [1, 1.2, 1],
-            }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Infinity,
-              repeatType: "reverse",
-            }}
-          />
-        ))}
+        {windowDimensions.width > 0 &&
+          Array.from({ length: 20 }).map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-1 h-1 bg-white rounded-full"
+              initial={{
+                x: Math.random() * windowDimensions.width,
+                y: Math.random() * 200,
+                opacity: 0.3,
+              }}
+              animate={{
+                y: [null, Math.random() * 200],
+                opacity: [0.3, 0.6, 0.3],
+                scale: [1, 1.2, 1],
+              }}
+              transition={{
+                duration: 3 + Math.random() * 2,
+                repeat: Infinity,
+                repeatType: "reverse",
+              }}
+            />
+          ))}
       </div>
 
       {/* Mouse follower effect */}
