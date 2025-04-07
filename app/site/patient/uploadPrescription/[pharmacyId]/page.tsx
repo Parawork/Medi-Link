@@ -1,6 +1,6 @@
+import PrescriptionUploadClient from "@/app/site/components/patient/PrescriptionUploadClient";
 import { requireUser } from "@/lib/requireUser";
 import { redirect } from "next/navigation";
-import PrescriptionUploadClient from "../../components/patient/PrescriptionUploadClient";
 
 export default async function NewPrescriptionPage({
   params,

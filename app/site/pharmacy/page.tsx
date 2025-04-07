@@ -1,4 +1,3 @@
-
 import { prisma } from "@/app/utils/db";
 import { requireUser } from "@/lib/requireUser";
 import { format } from "date-fns";
@@ -15,11 +14,8 @@ const formatDate = (date: Date) => {
   });
 };
 
-
 export default async function PharmacyDashboard() {
-
   const user = await requireUser("PHARMACY");
-
 
   const orders = await prisma.order.findMany({
     where: {
@@ -61,22 +57,23 @@ export default async function PharmacyDashboard() {
           Bridging Patients And Pharmacies Effortlessly
         </h2>
 
-        <div className="w-full flex gap-3 items-center justify-center my-6">
+        <div className="w-2/3 flex gap-3 items-center justify-center my-6">
           <Link
             href={`/site/pharmacy/orders`}
-            className="px-3 py-3 bg-yellow-600 text-white rounded-2xl hover:bg-yellow-600/90"
+            className="w-1/2 py-2 text-center bg-yellow-600 text-white rounded-2xl hover:bg-yellow-600/90 text-sm"
           >
-            Accepted Orders
+            Accepted Orders By Patients
           </Link>
           <Link
             href={`/site/pharmacy/orders`}
-            className="px-3 py-3 bg-green-900 text-white rounded-2xl hover:bg-green-900/90"
+            className="w-1/2 py-2 text-center bg-green-900 text-white rounded-2xl hover:bg-green-900/90 text-sm"
           >
-            Completed Orders
+            Paid Orders By Patients
           </Link>
         </div>
 
         <div className="space-y-4 w-full">
+          <h1 className="text-lg font-semibold ">Orders You have created </h1>
           {orders.map((order) => (
             <div
               key={order.id}
@@ -85,7 +82,7 @@ export default async function PharmacyDashboard() {
               {/* Avatar */}
               <div className="w-20 h-20 relative rounded-full overflow-hidden border">
                 <Image
-                  src="/images/today1.jpg"
+                  src={order.Patient?.avatar || "/images/noAvatar.png"}
                   alt={`${order.Patient?.fullName}'s avatar`}
                   fill
                   className="object-cover"
@@ -125,7 +122,5 @@ export default async function PharmacyDashboard() {
         </div>
       </div>
     </div>
-
   );
 }
-

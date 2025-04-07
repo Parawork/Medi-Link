@@ -36,9 +36,7 @@ const LogoUpload: React.FC<LogoUploadProps> = ({
         sources: ["local", "camera"],
         multiple: false,
         resourceType: "image",
-        cropping: true,
-        croppingAspectRatio: 1,
-        croppingShowDimensions: true,
+        cropping: false,
         showPoweredBy: false,
       }}
     >
@@ -48,6 +46,7 @@ const LogoUpload: React.FC<LogoUploadProps> = ({
             onClick={() => !disabled && open?.()}
             className={`
               relative 
+              h-[300px]
               cursor-pointer 
               hover:opacity-70 
               border-dashed 
@@ -78,7 +77,7 @@ const LogoUpload: React.FC<LogoUploadProps> = ({
                 <Image
                   alt="Pharmacy logo"
                   fill
-                  style={{ objectFit: "cover" }}
+                  style={{ objectFit: "contain" }}
                   src={value}
                   className="rounded-md"
                 />

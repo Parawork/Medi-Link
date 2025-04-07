@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/requireUser";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import PaginationControls from "../../components/pharmacy/PaginationControls";
 
 interface PrescriptionWithPatientAndOrders {
   id: string;
@@ -13,42 +14,75 @@ interface PrescriptionWithPatientAndOrders {
     fullName: string;
     dateOfBirth: Date;
     gender: string | null;
+    avatar: string | null;
   };
   Order: {
     id: string;
   }[];
 }
 
-export default async function PharmacyPrescriptionsPage() {
+export default async function PharmacyPrescriptionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const resolvedParams = await searchParams;
   const user = await requireUser("PHARMACY");
+  const page = resolvedParams["page"] ?? "1";
+  const per_page = resolvedParams["per_page"] ?? "10";
 
   if (!user.pharmacy) {
     return <div>Pharmacy profile not found</div>;
   }
 
-  const prescriptions = (await prisma.prescription.findMany({
-    where: {
-      pharmacyId: user.pharmacy.id,
-    },
-    include: {
-      patient: {
-        select: {
-          id: true,
-          fullName: true,
-          gender: true,
-          dateOfBirth: true,
+  // Calculate pagination parameters
+  const start = (Number(page) - 1) * Number(per_page);
+  const end = start + Number(per_page);
+
+  const [prescriptions, totalPrescriptions] = await Promise.all([
+    prisma.prescription.findMany({
+      where: {
+        pharmacyId: user.pharmacy.id,
+      },
+      include: {
+        patient: {
+          select: {
+            id: true,
+            fullName: true,
+            gender: true,
+            dateOfBirth: true,
+            avatar: true,
+          },
+        },
+        Order: {
+          select: {
+            id: true,
+            status: true,
+          },
         },
       },
-      Order: {
-        select: {
-          id: true,
-        },
+      orderBy: {
+        createdAt: "desc",
       },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  })) as PrescriptionWithPatientAndOrders[];
+      skip: start,
+      take: Number(per_page),
+    }) as Promise<PrescriptionWithPatientAndOrders[]>,
+    prisma.prescription.count({
+      where: {
+        pharmacyId: user.pharmacy.id,
+      },
+    }),
+  ]);
+
+  const sortedPrescriptions = prescriptions.sort((a, b) => {
+    const aHasOrders = a.Order.length > 0;
+    const bHasOrders = b.Order.length > 0;
+
+    if (!aHasOrders && bHasOrders) return -1;
+    if (aHasOrders && !bHasOrders) return 1;
+
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 
   const hasOrder = (prescriptionId: string) => {
     const prescription = prescriptions.find((p) => p.id === prescriptionId);
@@ -95,76 +129,114 @@ export default async function PharmacyPrescriptionsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold mb-6">Manage Prescriptions</h1>
+        <h1 className="text-3xl font-semibold tracking-tight mb-6">
+          Manage Prescriptions
+        </h1>
         <Link href="/site/pharmacy/orders">
           <Button>View All Orders</Button>
         </Link>
       </div>
 
-      <div className="flex flex-col gap-6">
-        {prescriptions.map((prescription) => (
-          <div
-            key={prescription.id}
-            className="flex flex-col bg-blue-100 h-[180px] rounded-3xl py-5 px-7 gap-4"
-          >
-            {/* Card Header */}
-            <div className="flex items-center justify-between px-3">
-              <div className="text-lg font-bold">
-                Prescription for {prescription.patient.fullName}
-              </div>
-              <div className="text-sm">
-                {formatPrescriptionDate(prescription.createdAt)}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              {/* Prescription thumbnail */}
-              <div className="h-[70px] w-[150px] relative rounded-xl bg-white/20">
-                <Image
-                  src={prescription.fileUrl}
-                  alt={`Prescription for ${prescription.patient.fullName}`}
-                  fill
-                  className="object-cover rounded-xl"
-                  priority
-                />
+      <div className="flex flex-col gap-6 mb-8">
+        {prescriptions.length > 0 ? (
+          prescriptions.map((prescription) => (
+            <div
+              key={prescription.id}
+              className="flex flex-col bg-gray-50 h-[180px] rounded-3xl py-5 px-7 gap-4"
+            >
+              {/* Card Header */}
+              <div className="flex items-center justify-between px-3">
+                <div className="text-lg tracking-tighter font-light">
+                  Prescription : {prescription.patient.fullName}
+                </div>
+                <div className="text-sm">
+                  {formatPrescriptionDate(prescription.createdAt)}
+                </div>
               </div>
 
-              {/* Action buttons */}
-              <div className="flex gap-8 items-center">
-                {hasOrder(prescription.id) ? (
-                  <>
-                    <Button variant="outline" disabled>
-                      Order Completed
-                    </Button>
+              <div className="flex items-center justify-between">
+                {/* Prescription thumbnail */}
+                <div className="h-[70px] w-[150px] relative rounded-xl bg-white/20">
+                  <Image
+                    src={prescription.fileUrl}
+                    alt={`Prescription for ${prescription.patient.fullName}`}
+                    fill
+                    className="object-cover rounded-xl"
+                    priority
+                  />
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex flex-col sm:flex-row gap-3 items-center">
+                  {hasOrder(prescription.id) ? (
+                    <>
+                      <div className="px-4 py-2 rounded-full bg-green-50 text-green-900 ring-1 ring-green-900 text-sm font-bold tracking-tighter">
+                        Order Completed
+                      </div>
+                      <Link
+                        href={`/site/pharmacy/orders/${prescription.Order[0].id}`}
+                        className="px-4 py-2 rounded-full bg-white text-blue-900 ring-1 ring-blue-900 text-sm tracking-tighter hover:bg-blue-900 hover:text-white"
+                      >
+                        View Order
+                      </Link>
+                    </>
+                  ) : (
                     <Link
-                      href={`/site/pharmacy/orders/${prescription.Order[0].id}`}
+                      href={`/site/pharmacy/order-history/${prescription.id}`}
+                      className="px-4 py-2 rounded-full bg-white text-blue-900 ring-1 ring-blue-900 text-sm tracking-tighter hover:bg-blue-900 hover:text-white"
                     >
-                      <Button>View Order</Button>
+                      Create Order
                     </Link>
-                  </>
-                ) : (
-                  <Link
-                    href={`/site/pharmacy/order-history/${prescription.id}`}
-                  >
-                    <Button>Create Order</Button>
-                  </Link>
-                )}
-              </div>
+                  )}
+                </div>
 
-              {/* Patient avatar */}
-              <div className="size-[70px] relative rounded-full bg-white/20">
-                <Image
-                  src="/default-avatar.png"
-                  alt={`${prescription.patient.fullName}'s avatar`}
-                  fill
-                  className="object-cover rounded-full"
-                  priority
-                />
+                {/* Patient avatar */}
+                <div className="size-[70px] relative rounded-full bg-white/20">
+                  <Image
+                    src={prescription.patient.avatar || "/images/noAvatar.png"}
+                    alt={`${prescription.patient.fullName}'s avatar`}
+                    fill
+                    className="object-cover rounded-full"
+                    priority
+                  />
+                </div>
               </div>
             </div>
+          ))
+        ) : (
+          <div className="text-center py-12 text-gray-500">
+            <div className="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-gray-400"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium">No prescriptions found</h3>
+            <p className="text-sm mt-1">
+              When you have prescriptions, they'll appear here
+            </p>
           </div>
-        ))}
+        )}
       </div>
+
+      <PaginationControls
+        totalItems={totalPrescriptions}
+        itemsPerPage={Number(per_page)}
+        currentPage={Number(page)}
+        basePath="/site/pharmacy/order-history"
+      />
     </div>
   );
 }

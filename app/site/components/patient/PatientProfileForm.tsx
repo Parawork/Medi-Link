@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { Loader2, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import {
   Form,
@@ -17,65 +17,88 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Textarea } from "@/components/ui/textarea";
-import LogoUpload from "../pharmacy/LogoUpload";
+import { cn } from "@/lib/utils";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import AvatarUpload from "./AvatarUpload";
+
+// Form schema
 const patientFormSchema = z.object({
-  fullName: z.string().min(1, "Name must be at least 2 characters"),
+  fullName: z.string().min(1, "Full name is required"),
+  dateOfBirth: z.date({
+    required_error: "Date of birth is required",
+  }),
   gender: z.string().optional(),
   avatar: z.string().optional(),
-  streetAddress: z.string().min(1, "Address is too short"),
+  streetAddress: z.string().min(1, "Address is required"),
   city: z.string().min(1, "City is required"),
   stateProvince: z.string().min(1, "State/Province is required"),
   postalCode: z.string().min(1, "Postal code is required"),
   country: z.string().min(1, "Country is required"),
   medicalConditions: z.string().optional(),
   allergies: z.string().optional(),
-  geoLocation: z
-    .object({
-      lat: z.number(),
-      lng: z.number(),
-    })
-    .optional(),
 });
 
 type PatientFormValues = z.infer<typeof patientFormSchema>;
 
 interface PatientProfileFormProps {
-  initialData?: {
-    fullName: string;
-    dateOfBirth?: string | Date;
-    // ... other fields
-  } | null;
+  initialData: Partial<PatientFormValues>;
 }
 
 export function PatientProfileForm({ initialData }: PatientProfileFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(!initialData);
 
+  // Process initialData to handle dateOfBirth
+  const processedInitialData = {
+    ...initialData,
+    // Convert dateOfBirth from string to Date object if it exists
+    dateOfBirth: initialData.dateOfBirth
+      ? new Date(initialData.dateOfBirth)
+      : undefined,
+  };
+
   const form = useForm<PatientFormValues>({
     resolver: zodResolver(patientFormSchema),
-    defaultValues: initialData
-      ? {
-          ...initialData,
-        }
-      : {
-          fullName: "",
-          gender: "",
-          avatar: "",
-          streetAddress: "",
-          city: "",
-          stateProvince: "",
-          postalCode: "",
-          country: "",
-          medicalConditions: "",
-          allergies: "",
-        },
+    defaultValues: processedInitialData || {
+      fullName: "",
+      dateOfBirth: undefined,
+      gender: "",
+      avatar: "",
+      streetAddress: "",
+      city: "",
+      stateProvince: "",
+      postalCode: "",
+      country: "",
+      medicalConditions: "",
+      allergies: "",
+    },
   });
 
+  // If initialData changes (like after fetch), reset the form
   useEffect(() => {
     if (initialData) {
-      form.reset(initialData);
+      const processedData = {
+        ...initialData,
+        // Convert dateOfBirth from string to Date object if it exists
+        dateOfBirth: initialData.dateOfBirth
+          ? new Date(initialData.dateOfBirth)
+          : undefined,
+      };
+      form.reset(processedData);
       setIsLoading(false);
     }
   }, [initialData, form]);
@@ -83,6 +106,7 @@ export function PatientProfileForm({ initialData }: PatientProfileFormProps) {
   const onSubmit = async (values: PatientFormValues) => {
     setIsSubmitting(true);
     try {
+      // The dateOfBirth is already a Date object, which will be serialized to ISO string by JSON.stringify
       const response = await fetch("/api/patient/profile", {
         method: "PUT",
         headers: {
@@ -95,8 +119,16 @@ export function PatientProfileForm({ initialData }: PatientProfileFormProps) {
         throw new Error("Failed to update profile");
       }
 
-      const resultData = await response.json();
-      form.reset(resultData);
+      const updatedData = await response.json();
+      // Convert the dateOfBirth back to a Date object for the form
+      const processedUpdatedData = {
+        ...updatedData,
+        dateOfBirth: updatedData.dateOfBirth
+          ? new Date(updatedData.dateOfBirth)
+          : undefined,
+      };
+
+      form.reset(processedUpdatedData);
       toast.success("Profile updated successfully");
     } catch (error) {
       toast.error("Failed to update profile");
@@ -104,6 +136,18 @@ export function PatientProfileForm({ initialData }: PatientProfileFormProps) {
       setIsSubmitting(false);
     }
   };
+
+  const handleAvatarUpload = async (url: string) => {
+    form.setValue("avatar", url);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>
@@ -114,12 +158,12 @@ export function PatientProfileForm({ initialData }: PatientProfileFormProps) {
             control={form.control}
             name="avatar"
             render={({ field }) => (
-              <FormItem className="md:col-span-2">
-                <FormLabel>Profile Picture</FormLabel>
+              <FormItem className="md:col-span-2 flex flex-col items-center">
+                <FormLabel>Profile Photo</FormLabel>
                 <FormControl>
-                  <LogoUpload
+                  <AvatarUpload
                     value={field.value || ""}
-                    onChange={field.onChange}
+                    onChange={handleAvatarUpload}
                     disabled={isSubmitting}
                   />
                 </FormControl>
@@ -144,6 +188,49 @@ export function PatientProfileForm({ initialData }: PatientProfileFormProps) {
           />
 
           {/* Date of Birth */}
+          <FormField
+            control={form.control}
+            name="dateOfBirth"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Date of Birth</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                        disabled={isSubmitting}
+                      >
+                        {field.value ? (
+                          new Intl.DateTimeFormat("en-US", {
+                            dateStyle: "medium",
+                          }).format(field.value)
+                        ) : (
+                          <span>Select date</span>
+                        )}
+                        <Calendar className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) => date > new Date() || isSubmitting}
+                      initialFocus
+                      weekStartsOn={1}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           {/* Gender */}
           <FormField
@@ -152,9 +239,21 @@ export function PatientProfileForm({ initialData }: PatientProfileFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Gender</FormLabel>
-                <FormControl>
-                  <Input {...field} disabled={isSubmitting} />
-                </FormControl>
+                <Select
+                  disabled={isSubmitting}
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -244,9 +343,10 @@ export function PatientProfileForm({ initialData }: PatientProfileFormProps) {
                 <FormLabel>Medical Conditions</FormLabel>
                 <FormControl>
                   <Textarea
+                    placeholder="List any medical conditions here..."
+                    className="resize-none min-h-[100px]"
                     {...field}
                     disabled={isSubmitting}
-                    className="min-h-[100px]"
                   />
                 </FormControl>
                 <FormMessage />
@@ -263,9 +363,10 @@ export function PatientProfileForm({ initialData }: PatientProfileFormProps) {
                 <FormLabel>Allergies</FormLabel>
                 <FormControl>
                   <Textarea
+                    placeholder="List any allergies here..."
+                    className="resize-none min-h-[100px]"
                     {...field}
                     disabled={isSubmitting}
-                    className="min-h-[100px]"
                   />
                 </FormControl>
                 <FormMessage />
@@ -274,11 +375,7 @@ export function PatientProfileForm({ initialData }: PatientProfileFormProps) {
           />
         </div>
 
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          name="submit-button" // Add name attribute
-        >
+        <Button type="submit" disabled={isSubmitting || isLoading}>
           {isSubmitting ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (

@@ -161,7 +161,7 @@ export function OrderForm({ prescription }: { prescription: string }) {
         </Button>
 
         <div className="text-lg font-semibold">
-          Total: ${totalAmount.toFixed(2)}
+          Total: LKR {totalAmount.toFixed(2)}
         </div>
       </div>
 

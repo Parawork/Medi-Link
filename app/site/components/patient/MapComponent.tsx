@@ -848,7 +848,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
               <span className="btn-icon">📞</span> Call Pharmacy
             </button> */}
             <Link
-              href={`/site/patient/${selectedPharmacy.id}`}
+              href={`/site/patient/uploadPrescription/${selectedPharmacy.id}`}
               className="call-btn"
             >
               <button className="call-btn">Upload Prescription</button>

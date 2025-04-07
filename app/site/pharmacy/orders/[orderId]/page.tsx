@@ -84,9 +84,9 @@ export default async function SingleOrderPage({
               Back to Orders
             </Button>
           </form>
-          <form action={`/site/pharmacy/orders/${orderId}/update`}>
+          {/* <form action={`/site/pharmacy/orders/${orderId}/update`}>
             <Button type="submit">Update Status</Button>
-          </form>
+          </form> */}
         </div>
       </div>
 
@@ -121,9 +121,11 @@ export default async function SingleOrderPage({
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium">${item.price.toFixed(2)}</p>
+                        <p className="font-medium">
+                          LKR {item.price.toFixed(2)}
+                        </p>
                         <p className="text-sm text-gray-500">
-                          ${(item.price * item.quantity).toFixed(2)}
+                          LKR {(item.price * item.quantity).toFixed(2)}
                         </p>
                       </div>
                     </div>
@@ -135,7 +137,7 @@ export default async function SingleOrderPage({
               <div className="bg-gray-50 rounded-md p-4">
                 <div className="flex justify-between font-bold">
                   <span>Total Amount</span>
-                  <span>${order.totalAmount.toFixed(2)}</span>
+                  <span>LKR {order.totalAmount.toFixed(2)}</span>
                 </div>
               </div>
             </div>

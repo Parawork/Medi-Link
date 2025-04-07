@@ -11,7 +11,7 @@ export default function OrderTabs({ pharmacyId }: { pharmacyId: string }) {
       <Tabs defaultValue="accepted" className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-6">
           <TabsTrigger value="accepted">Accepted Orders</TabsTrigger>
-          <TabsTrigger value="completed">Completed Orders</TabsTrigger>
+          <TabsTrigger value="completed">Paid Orders</TabsTrigger>
         </TabsList>
 
         <Suspense fallback={<OrderListSkeleton />}>

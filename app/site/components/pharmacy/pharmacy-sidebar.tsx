@@ -46,7 +46,7 @@ export default function PharmacySidebar() {
         <Link
           href="/site/pharmacy/order-history"
           className={`flex items-center gap-3 p-3 rounded-md ${
-            isActive("/dashboardNew/pharmacy/orders")
+            isActive("/site/pharmacy/order-history")
               ? "bg-blue-200 text-blue-800"
               : "hover:bg-gray-100"
           }`}
@@ -58,7 +58,7 @@ export default function PharmacySidebar() {
         <Link
           href="/site/pharmacy/updateProfile"
           className={`flex items-center gap-3 p-3 rounded-md ${
-            isActive("/dashboardNew/pharmacy/profile")
+            isActive("/site/pharmacy/updateProfile")
               ? "bg-blue-200 text-blue-800"
               : "hover:bg-gray-100"
           }`}
@@ -72,7 +72,7 @@ export default function PharmacySidebar() {
             type="submit"
             className={`flex items-center gap-3 p-3 rounded-md w-full ${
               collapsed ? "" : "mt-4"
-            } bg-red-100 text-red-600 hover:bg-red-200`}
+            } hover:bg-red-100 text-red-600 `}
           >
             <LogOut size={18} />
             {!collapsed && <span>Logout</span>}
