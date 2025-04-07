@@ -39,7 +39,7 @@ export default async function DashboardLayout({
         <div className="hidden border-r md:block sticky top-0 h-screen">
           {/* LOGO AND NAME */}
           <div className="flex max-h-screen h-full gap-2 flex-col ">
-            <div className="flex w-full items-center border-b px-4 lg:h-[60px] lg:px-6 bg-primary">
+            <div className="flex w-full items-center border-b px-4 md:h-14 lg:h-[60px] lg:px-6 bg-primary">
               <Link href="/" className="mx-auto text-2xl font-bold text-white">
                 Medi Link
                 {/* LOGO */}
