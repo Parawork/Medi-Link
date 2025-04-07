@@ -4,8 +4,6 @@ import Image from "next/image"
 import Link from "next/link"
 import { Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import Sidebar from "@/components/sidebar"
 import { requireUser } from "@/lib/requireUser"
 import { prisma } from "@/app/utils/db"
 
@@ -46,7 +44,7 @@ export default async function CustomerDashboard() {
                 Pharmacies Near Me
               </Button>
             </Link>
-            <Link href="/track-orders">
+            <Link href={`/site/patient/track-order/`}>
               <Button variant="outline" className="border-[#0a2351] text-[#0a2351]">
                 Track Orders
               </Button>
