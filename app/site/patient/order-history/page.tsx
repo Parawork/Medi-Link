@@ -101,9 +101,15 @@ export default async function PatientOderHistory() {
 
             <TabsContent value="prescriptions" className="mt-0">
               <div className="bg-white rounded-lg border border-gray-100 p-6">
-                <h2 className="text-xl font-semibold mb-4">
-                  Uploaded Prescriptions
-                </h2>
+                <div className="flex flex-col mb-4 gap-2">
+                  <h2 className="text-xl font-semibold">
+                    Uploaded Prescriptions
+                  </h2>
+                  <p className="text-sm text-gray-400">
+                    Pending: Pharmacist hasn't checked your prescription. So no
+                    Order created yet.
+                  </p>
+                </div>
 
                 <div className="space-y-4">
                   {prescriptions.map((order) => (
@@ -168,7 +174,7 @@ export default async function PatientOderHistory() {
 
             <TabsContent value="accepted" className="mt-0">
               <div className="bg-white rounded-lg border border-gray-100 p-6">
-                <div>
+                <div className=" flex flex-col gap-1 mb-6">
                   <h2 className="text-xl font-semibold mb-4">
                     Accepted Prescriptions
                   </h2>
@@ -226,7 +232,13 @@ export default async function PatientOderHistory() {
 
             <TabsContent value="completed" className="mt-0">
               <div className="bg-white rounded-lg border border-gray-100 p-6">
-                <h2 className="text-xl font-semibold mb-4">Completed Orders</h2>
+                <div className="flex flex-col mb-4 gap-2">
+                  <h2 className="text-xl font-semibold">Completed Orders</h2>
+                  <p className="text-sm text-gray-400">
+                    When you make a payment for an Order they will appear here
+                    as Completed Orders
+                  </p>
+                </div>
 
                 <div className="space-y-4">
                   {completedOrders.map((order) => (
