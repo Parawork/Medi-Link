@@ -220,7 +220,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           // Transform API data to ensure it has all required fields
           const processedData = data.map((pharmacy: any) => ({
             ...pharmacy,
-            availability: pharmacy.availability || randomAvailability(),
+            availability: pharmacy.quality || randomAvailability(),
             openHours: pharmacy.openHours || "9:00 AM - 6:00 PM",
             geoLocation: pharmacy.geoLocation || {
               latitude: latitude + (Math.random() - 0.5) * 0.05,
@@ -834,24 +834,16 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   "_blank"
                 );
               }}
-              className="directions-btn"
+              className="bg-[#4285f4] text-white w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-base font-medium transition-transform duration-200 hover:bg-[#3b78e7] hover:translate-y-[-2px] hover:shadow-lg"
             >
-              <span className="btn-icon">🧭</span> Get Directions
+              <span className="text-xl">🧭</span> Get Directions
             </button>
-            {/* <button
-              className="call-btn"
-              onClick={(e) => {
-                e.stopPropagation(); // Stop event from propagating to parent
-                window.open(`tel:${selectedPharmacy.phone}`, "_blank");
-              }}
-            >
-              <span className="btn-icon">📞</span> Call Pharmacy
-            </button> */}
+
             <Link
               href={`/site/patient/uploadPrescription/${selectedPharmacy.id}`}
-              className="call-btn"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#34a853] text-white rounded-lg text-base font-medium transition-transform duration-200 hover:bg-[#2e9549] hover:translate-y-[-2px] hover:shadow-lg"
             >
-              <button className="call-btn">Upload Prescription</button>
+              <button className="w-full h-full">Upload Prescription</button>
             </Link>
           </div>
         </div>
