@@ -1,26 +1,9 @@
 import { ReactNode } from "react";
-
-import { redirect } from "next/navigation";
 import Link from "next/link";
-
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
 import { LogOut, Menu, User2 } from "lucide-react";
 import { DialogTitle } from "@radix-ui/react-dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-import { prisma } from "@/app/utils/db";
 import { requireUser } from "@/lib/requireUser";
-import { signOut } from "@/lib/auth";
-
-import { cn } from "@/lib/utils";
 import { handleSignOut } from "../components/patient/signOutAction";
 import { PharmacyDashboardLinks } from "../components/PharmacyDashboardLinks";
 
