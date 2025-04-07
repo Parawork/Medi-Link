@@ -19,7 +19,7 @@ export const patientDashboardLinks = [
   },
   {
     id: 2,
-    name: "Order History",
+    name: "Prescriptions/Orders",
     href: "/site/patient/order-history",
     icon: Clock8,
   },

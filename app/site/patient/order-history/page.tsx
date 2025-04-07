@@ -88,7 +88,7 @@ export default async function PatientOderHistory() {
                   value="accepted"
                   className="data-[state=active]:bg-amber-500 data-[state=active]:text-white bg-amber-100 text-amber-500 rounded-md py-2"
                 >
-                  Accepted Orders
+                  Accepted Prescriptions
                 </TabsTrigger>
                 <TabsTrigger
                   value="completed"
@@ -168,7 +168,9 @@ export default async function PatientOderHistory() {
 
             <TabsContent value="accepted" className="mt-0">
               <div className="bg-white rounded-lg border border-gray-100 p-6">
-                <h2 className="text-xl font-semibold mb-4">Accepted Orders</h2>
+                <h2 className="text-xl font-semibold mb-4">
+                  Accepted Prescriptions
+                </h2>
 
                 <div className="space-y-4">
                   {acceptedOrders.map((order) => (

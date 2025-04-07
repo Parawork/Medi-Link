@@ -51,7 +51,9 @@ export default async function CustomerDashboard() {
         </div>
 
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-xl font-semibold mb-4">Recent Orders</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            Recent Responses From Pharmacies
+          </h2>
 
           <div className="space-y-6">
             {orders.map((order, index) => (
@@ -102,7 +104,7 @@ export default async function CustomerDashboard() {
                         size="sm"
                         className="bg-[#0a2351] hover:bg-[#0a2351]/90 text-white"
                       >
-                        Place New Order
+                        Upload Prescription
                       </Button>
                     </Link>
                   </div>

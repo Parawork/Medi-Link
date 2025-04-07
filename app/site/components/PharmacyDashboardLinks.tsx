@@ -13,7 +13,7 @@ export const pharmacyDashboardLinks = [
   },
   {
     id: 1,
-    name: "Order History",
+    name: "Prescriptions",
     href: "/site/pharmacy/order-history",
     icon: Clock8,
   },
