@@ -33,6 +33,7 @@ export default async function PatientOderHistory() {
       id: true,
       createdAt: true,
       fileUrl: true,
+      Order: true,
       pharmacy: {
         select: {
           id: true,
@@ -44,6 +45,20 @@ export default async function PatientOderHistory() {
     orderBy: {
       createdAt: "desc",
     },
+  });
+
+  // Sort the prescriptions after fetching
+  // Prescriptions with NO orders first, then by creation date
+  const sortedPrescriptions = prescriptions.sort((a, b) => {
+    // Check if prescription has any orders
+    const aHasOrders = a.Order.length > 0;
+    const bHasOrders = b.Order.length > 0;
+
+    if (!aHasOrders && bHasOrders) return -1; // A has no orders, B has orders, so A comes first
+    if (aHasOrders && !bHasOrders) return 1; // A has orders, B has no orders, so B comes first
+
+    // If both have the same order status, sort by creation date (desc)
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
   const acceptedOrders = orders.filter((order) => order.status === "ACCEPTED");
@@ -111,10 +126,22 @@ export default async function PatientOderHistory() {
                             <h3 className="font-medium">
                               {order.pharmacy.name}
                             </h3>
-
-                            <p className="text-sm text-gray-500">
-                              {order.createdAt.toLocaleDateString("en-US")}
-                            </p>
+                            <div className="flex flex-col gap-1">
+                              <p className="text-sm text-gray-500">
+                                {order.createdAt.toLocaleDateString("en-US")}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                {order.Order.length > 0 ? (
+                                  <span className="text-sm text-green-500">
+                                    Can view your medications
+                                  </span>
+                                ) : (
+                                  <span className="text-sm text-yellow-500">
+                                    Pending: Check again later
+                                  </span>
+                                )}
+                              </p>
+                            </div>
                           </div>
                         </div>
                         <div className="flex gap-2">
@@ -231,12 +258,9 @@ export default async function PatientOderHistory() {
                               Order Info
                             </Button>
                           </Link>
-                          <Button
-                            size="sm"
-                            className="bg-teal-500 hover:bg-teal-600 text-white rounded-full"
-                          >
+                          <div className="bg-teal-600 text-white rounded-full text-sm font-medium items-center flex text-center px-2 py-1">
                             Completed
-                          </Button>
+                          </div>
                         </div>
                       </div>
                     </div>
