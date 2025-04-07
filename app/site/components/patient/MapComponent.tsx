@@ -480,8 +480,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
         zoomControl: false,
       }).setView([latitude, longitude], size);
 
-      setMapInstance(map);
-
       // Add tile layer
       L.tileLayer(
         "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
@@ -510,7 +508,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
       (userMarker as any)._isUserMarker = true;
       userMarker.openPopup();
 
-      // Add pharmacy markers
+      // Set map instance after initialization
+      setMapInstance(map);
+
+      // Add pharmacy markers after map is initialized
       if (pharmacies.length > 0) {
         addPharmacyMarkers(map);
       }
@@ -537,14 +538,17 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
       // Add new markers
       pharmacies.forEach((pharmacy) => {
+        if (!pharmacy.geoLocation?.latitude || !pharmacy.geoLocation?.longitude)
+          return;
+
         const pharmacyIcon = L.divIcon({
           html: `<div class="bg-white rounded-full h-9 w-9 flex items-center justify-center shadow-md text-2xl">💊</div>`,
           className: "pharmacy-icon",
           iconSize: [36, 36],
         });
 
-        const lat = pharmacy.geoLocation?.latitude ?? latitude;
-        const lng = pharmacy.geoLocation?.longitude ?? longitude;
+        const lat = pharmacy.geoLocation.latitude;
+        const lng = pharmacy.geoLocation.longitude;
 
         L.marker([lat, lng], { icon: pharmacyIcon })
           .addTo(map)
@@ -566,7 +570,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           });
       });
     },
-    [pharmacies, latitude, longitude]
+    [pharmacies]
   );
 
   // Update markers when pharmacies change
