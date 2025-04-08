@@ -6,7 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Loader2, Calendar } from "lucide-react";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
+
 import {
   Form,
   FormControl,
@@ -103,6 +104,8 @@ export function PatientProfileForm({ initialData }: PatientProfileFormProps) {
     }
   }, [initialData, form]);
 
+  const { toast } = useToast();
+
   const onSubmit = async (values: PatientFormValues) => {
     setIsSubmitting(true);
     try {
@@ -129,9 +132,16 @@ export function PatientProfileForm({ initialData }: PatientProfileFormProps) {
       };
 
       form.reset(processedUpdatedData);
-      toast.success("Profile updated successfully");
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      });
     } catch (error) {
-      toast.error("Failed to update profile");
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }

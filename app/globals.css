@@ -96,3 +96,6 @@ body {
   }
 }
 
+[data-sonner-toast] {
+  z-index: 10000;
+}

@@ -6,7 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
+
 import {
   Form,
   FormControl,
@@ -65,6 +66,8 @@ export function PharmacyProfileForm({ initialData }: PharmacyProfileFormProps) {
     }
   }, [initialData, form]);
 
+  const { toast } = useToast();
+
   const onSubmit = async (values: PharmacyFormValues) => {
     setIsSubmitting(true);
     try {
@@ -82,9 +85,16 @@ export function PharmacyProfileForm({ initialData }: PharmacyProfileFormProps) {
 
       const updatedData = await response.json();
       form.reset(updatedData);
-      toast.success("Profile updated successfully");
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      });
     } catch (error) {
-      toast.error("Failed to update profile");
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -106,9 +116,16 @@ export function PharmacyProfileForm({ initialData }: PharmacyProfileFormProps) {
         const mockFilePath = `/pharmacyLogos/${file.name}`;
 
         form.setValue("logo", mockFilePath);
-        toast.success("Logo uploaded successfully");
+        toast({
+          title: "Success",
+          description: "Logo uploaded successfully",
+        });
       } catch (error) {
-        toast.error("Failed to upload logo");
+        toast({
+          title: "Error",
+          description: "Failed to upload logo",
+          variant: "destructive",
+        });
       } finally {
         setIsLoading(false);
       }
