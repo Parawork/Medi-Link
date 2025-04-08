@@ -186,6 +186,12 @@ export default async function ReviewOrder({
           </div>
         </div>
       </div>
+      {prescription.instructions && (
+        <div className="bg-white p-6 rounded-lg shadow">
+          <p className="text-sm text-gray-500 my-2">Instructions</p>
+          <p className="font-semibold text-lg -">{prescription.instructions}</p>
+        </div>
+      )}
 
       {/* Order Form */}
       <div className="bg-white p-6 rounded-lg shadow">
