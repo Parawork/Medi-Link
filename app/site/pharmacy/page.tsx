@@ -112,7 +112,7 @@ export default async function PharmacyDashboard() {
                       Order Info
                     </Link>
                     <span className="text-sm px-3 py-1.5 rounded-md bg-red-500 text-white font-medium">
-                      User haven't Paid yet
+                      {`User haven't Paid yet`}
                     </span>
                   </div>
                 </div>
@@ -125,7 +125,7 @@ export default async function PharmacyDashboard() {
                   Order Info
                 </Link>
                 <span className="text-sm px-3 py-1.5 rounded-md bg-red-500 text-white font-medium">
-                  User haven't Paid yet
+                  {`User haven't Paid yet`}
                 </span>
               </div>
             </div>

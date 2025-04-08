@@ -64,7 +64,7 @@ const PrescriptionUploadClient: React.FC<PrescriptionUploadClientProps> = ({
         <div className="space-y-2">
           <h2 className="text-lg font-medium">Prescription Image</h2>
           <p className="text-sm text-gray-600">
-            Upload a clear photo or scan of your doctor's prescription
+            {`Upload a clear photo or scan of your doctor's prescription`}
           </p>
           <ImageUpload
             value={fileUrl}

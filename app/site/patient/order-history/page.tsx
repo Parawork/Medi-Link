@@ -108,8 +108,8 @@ export default async function PatientOderHistory() {
                     Uploaded Prescriptions
                   </h2>
                   <p className="text-xs sm:text-sm text-gray-400">
-                    Pending: Pharmacist hasn't checked your prescription. So no
-                    Order created yet.
+                    {`Pending: Pharmacist hasn't checked your prescription. So no
+                    Order created yet.`}
                   </p>
                 </div>
 
