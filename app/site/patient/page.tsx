@@ -115,7 +115,7 @@ export default async function CustomerDashboard() {
                         size="sm"
                         className="bg-[#0a2351] hover:bg-[#0a2351]/90 text-white w-full"
                       >
-                        Upload Prescription
+                        Upload New Prescription
                       </Button>
                     </Link>
                   </div>
