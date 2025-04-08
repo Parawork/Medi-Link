@@ -1,7 +1,7 @@
 import { prisma } from "@/app/utils/db"; // Assuming you're using Prisma
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft, MessageSquare, Download } from "lucide-react";
+import { ChevronLeft, MessageSquare, Download, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button"; // Adjust the path based on your project structure
 import { UpdateOrderStatusForm } from "@/app/site/components/patient/UpdateOrderStatusForm";
 
@@ -22,6 +22,7 @@ export default async function OrderInfoPage({
       pharmacy: true,
       items: true,
       prescription: true,
+      notes: true,
     },
   }); // Get the order ID from the URL parameters
   if (!order) {
@@ -56,6 +57,11 @@ export default async function OrderInfoPage({
                   <h2 className="text-lg sm:text-xl font-semibold">
                     {order.pharmacy.name}
                   </h2>
+                  <div className="flex gap-1 items-center">
+                    {" "}
+                    <Phone className="size-4" />
+                    Phone: {order.pharmacy.phone}
+                  </div>
                 </div>
               </div>
               <div className="flex flex-col items-start sm:items-end">
@@ -124,6 +130,16 @@ export default async function OrderInfoPage({
                 Created At:{" "}
                 {new Date(order.prescription.createdAt).toLocaleDateString()}
               </p>
+              {order.notes && (
+                <>
+                  <div className="h-[1px] bg-gray-400 w-full my-3" />
+                  <h3 className="text-base sm:text-lg font-medium mb-3 sm:mb-4 mt-3 sm:mt-4">
+                    Prescription Notes
+                  </h3>
+                  <p className="text-gray-700 mt-2">{order.notes}</p>
+                  <div className="h-[1px] bg-gray-400 w-full my-3" />
+                </>
+              )}
             </div>
 
             <div className="flex flex-col gap-5 justify-between">
