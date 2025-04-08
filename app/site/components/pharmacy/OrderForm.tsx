@@ -101,8 +101,11 @@ export function OrderForm({ prescription }: { prescription: string }) {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-4">
         {items.map((item, index) => (
-          <div key={index} className="grid grid-cols-12 gap-4 items-end">
-            <div className="col-span-5">
+          <div
+            key={index}
+            className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 items-end"
+          >
+            <div className="col-span-1 sm:col-span-5">
               <label className="block text-sm font-medium mb-1">
                 Medicine Name
               </label>
@@ -115,7 +118,7 @@ export function OrderForm({ prescription }: { prescription: string }) {
                 required
               />
             </div>
-            <div className="col-span-3">
+            <div className="col-span-1 sm:col-span-3">
               <label className="block text-sm font-medium mb-1">Price</label>
               <Input
                 type="text"
@@ -129,7 +132,7 @@ export function OrderForm({ prescription }: { prescription: string }) {
                 required
               />
             </div>
-            <div className="col-span-2">
+            <div className="col-span-1 sm:col-span-2">
               <label className="block text-sm font-medium mb-1">Quantity</label>
               <Input
                 type="text"
@@ -142,12 +145,13 @@ export function OrderForm({ prescription }: { prescription: string }) {
                 required
               />
             </div>
-            <div className="col-span-2">
+            <div className="col-span-1 sm:col-span-2 mt-2 sm:mt-0">
               <Button
                 type="button"
                 variant="destructive"
                 onClick={() => handleRemoveItem(index)}
                 disabled={items.length <= 1}
+                className="w-full"
               >
                 Remove
               </Button>
@@ -155,19 +159,20 @@ export function OrderForm({ prescription }: { prescription: string }) {
           </div>
         ))}
       </div>
-
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
         <Button type="button" variant="secondary" onClick={handleAddItem}>
           Add Medicine
         </Button>
-
         <div className="text-lg font-semibold">
           Total: LKR {totalAmount.toFixed(2)}
         </div>
       </div>
-
       <div className="pt-4 border-t">
-        <Button type="submit" disabled={isSubmitting}>
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full sm:w-auto"
+        >
           {isSubmitting ? "Creating Order..." : "Create Order"}
         </Button>
       </div>
