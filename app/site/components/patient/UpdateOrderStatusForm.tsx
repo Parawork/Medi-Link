@@ -3,10 +3,13 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export function UpdateOrderStatusForm({ orderId }: { orderId: string }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,9 +28,17 @@ export function UpdateOrderStatusForm({ orderId }: { orderId: string }) {
       if (data.success) {
         router.push("/site/patient/order-history");
         router.refresh();
+        toast({
+          title: "Success",
+          description: "Payment made successfully",
+        });
       }
     } catch (error) {
-      console.error("Submission error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to make the payment",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
