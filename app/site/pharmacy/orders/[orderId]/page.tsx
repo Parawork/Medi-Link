@@ -210,6 +210,18 @@ export default async function SingleOrderPage({
                     <p>{order.prescription.patient.allergies}</p>
                   </div>
                 )}
+                {order.prescription.instructions && (
+                  <div>
+                    <p className="text-sm text-gray-500">Instructions</p>
+                    <p>{order.prescription.instructions}</p>
+                  </div>
+                )}
+                {order.notes && (
+                  <div>
+                    <p className="text-sm text-gray-500">Notes</p>
+                    <p>{order.notes}</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

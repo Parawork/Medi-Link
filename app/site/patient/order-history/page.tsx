@@ -25,6 +25,9 @@ export default async function PatientOderHistory() {
         },
       },
     },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
 
   const prescriptions = await prisma.prescription.findMany({
