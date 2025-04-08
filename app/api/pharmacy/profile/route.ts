@@ -33,8 +33,6 @@ export async function PUT(req: Request) {
       }
     }
 
-    console.log(data);
-
     const updatedPharmacy = await prisma.pharmacy.update({
       where: { id: user.pharmacy?.id },
       data: {
