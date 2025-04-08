@@ -76,7 +76,7 @@ export default async function DashboardLayout({
               </SheetTrigger>
               <SheetContent side="left">
                 <DialogTitle> </DialogTitle>
-                <nav className="grid gap-2 mt-10 mx-6">
+                <nav className="grid gap-2 mt-10 mx-auto">
                   <PatientDashboardLinks />
                   <div className="w-full hover:bg-red-100 rounded-lg">
                     <form action={handleSignOut}>

@@ -28,7 +28,7 @@ export default async function DashboardLayout({
               </Link>
             </div>
             <div className="flex-1 ">
-              <nav className="px-3 mt-3">
+              <nav className="px-3 mt-3 mx-auto">
                 <PharmacyDashboardLinks />
                 <div className="w-full hover:bg-red-100 rounded-lg">
                   <form action={handleSignOut}>

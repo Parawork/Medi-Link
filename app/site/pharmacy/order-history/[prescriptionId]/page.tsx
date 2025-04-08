@@ -25,6 +25,8 @@ export default async function ReviewOrder({
           city: true,
           stateProvince: true,
           avatar: true,
+          medicalConditions: true,
+          allergies: true,
         },
       },
     },
@@ -116,6 +118,23 @@ export default async function ReviewOrder({
                 {prescription.patient.city},{" "}
                 {prescription.patient.stateProvince}
               </p>
+              {prescription.patient.medicalConditions && (
+                <div>
+                  <p className="text-sm text-gray-500 my-2">
+                    Medical Conditions
+                  </p>
+                  <p className="font-bold">
+                    {prescription.patient.medicalConditions}
+                  </p>
+                </div>
+              )}
+
+              {prescription.patient.allergies && (
+                <div>
+                  <p className="text-sm text-gray-500 my-2">Allergies</p>
+                  <p className="font-bold">{prescription.patient.allergies}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

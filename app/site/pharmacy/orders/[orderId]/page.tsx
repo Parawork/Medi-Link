@@ -71,7 +71,7 @@ export default async function SingleOrderPage({
   };
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4">
+    <div className="w-full mx-auto py-8 px-4">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-lg sm:text-xl md:text-3xl font-bold">
@@ -92,9 +92,9 @@ export default async function SingleOrderPage({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="flex flex-col gap-6">
         {/* Order Summary */}
-        <Card className="lg:col-span-2">
+        <Card className="">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle>Order Summary</CardTitle>
