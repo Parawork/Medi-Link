@@ -6,14 +6,11 @@ import { requireUser } from "@/lib/requireUser";
 import { prisma } from "@/app/utils/db";
 
 export default async function CustomerDashboard() {
-  const user = await requireUser("PATIENT"); // runs server-side
-
-  console.log("User:", user.patient?.id); // Log the user object to see its structure
+  const user = await requireUser("PATIENT");
 
   const orders = await prisma.order.findMany({
     where: {
-      patientId: user.patient?.id, // Filter by the logged-in user's patient ID
-      // status: "COMPLETED"
+      patientId: user.patient?.id,
     },
     take: 5,
 
@@ -35,7 +32,7 @@ export default async function CustomerDashboard() {
   });
 
   return (
-    <div className="flex min-h-screen bg-white w-screen">
+    <div className="flex min-h-screen bg-white w-full">
       <main className="flex-1 p-6">
         <div className="flex justify-center gap-4 mb-8">
           <Link href="/site/patient/search-pharmacies">
