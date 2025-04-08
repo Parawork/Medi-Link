@@ -787,7 +787,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 <div
                   className={`flex-1 text-center py-2 px-2 rounded-md text-sm cursor-pointer border transition-colors ${
                     showOpenOnly
-                      ? "bg-blue-50 text-blue-600 border-blue-200 border-blue-200 font-medium"
+                      ? "bg-blue-50 text-blue-600 border-blue-200 font-medium"
                       : "bg-white border-gray-100 hover:bg-gray-50"
                   }`}
                   onClick={() => setShowOpenOnly(true)}
