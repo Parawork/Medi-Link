@@ -32,8 +32,8 @@ export default async function CustomerDashboard() {
   });
 
   return (
-    <div className="flex min-h-screen bg-white w-full">
-      <main className="flex-1 p-6">
+    <div className="flex flex-col min-h-screen bg-white w-full items-center p-1">
+      <main className="flex-1">
         <div className="flex justify-center gap-4 mb-8">
           <Link href="/site/patient/search-pharmacies">
             <Button className="bg-[#0a2351] hover:bg-[#0a2351]/90 text-white">
