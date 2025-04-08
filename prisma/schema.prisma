@@ -132,14 +132,15 @@ enum Quality {
 }
 
 model Prescription {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  patientId  String   @db.ObjectId
-  patient    Patient  @relation(fields: [patientId], references: [id])
-  fileUrl    String // URL to the uploaded prescription image/file
-  createdAt  DateTime @default(now())
-  pharmacyId String   @db.ObjectId
-  pharmacy   Pharmacy @relation(fields: [pharmacyId], references: [id])
-  Order      Order[]
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  patientId    String   @db.ObjectId
+  patient      Patient  @relation(fields: [patientId], references: [id])
+  fileUrl      String // URL to the uploaded prescription image/file
+  createdAt    DateTime @default(now())
+  pharmacyId   String   @db.ObjectId
+  pharmacy     Pharmacy @relation(fields: [pharmacyId], references: [id])
+  Order        Order[]
+  instructions String   @default("")
 }
 
 model Order {
@@ -156,6 +157,7 @@ model Order {
   prescriptionId String       @db.ObjectId
   prescription   Prescription @relation(fields: [prescriptionId], references: [id])
   status         Status       @default(PENDING)
+  notes          String       @default("")
 }
 
 enum Status {

@@ -28,6 +28,7 @@ export async function POST(request: Request) {
       .object({
         prescriptionId: z.string().min(1, "Prescription ID is required"),
         items: z.array(OrderItemSchema).min(1, "At least one item is required"),
+        notes: z.string().optional(),
       })
       .safeParse(body);
 
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { prescriptionId, items } = validation.data;
+    const { prescriptionId, items, notes } = validation.data;
 
     // Verify prescription exists and belongs to this pharmacy
     const prescription = await prisma.prescription.findUnique({
@@ -82,6 +83,7 @@ export async function POST(request: Request) {
           prescriptionId: prescription.id,
           status: "ACCEPTED",
           totalAmount,
+          notes: notes || "",
           items: {
             create: items.map((item) => ({
               name: item.name,
@@ -107,9 +109,6 @@ export async function POST(request: Request) {
         },
       });
 
-      // Add any additional business logic here
-      // Example: Send notification to patient
-
       return order;
     });
 
@@ -122,90 +121,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
-// export async function GET(request: Request) {
-//   try {
-//     const user = await requireUser("PHARMACY");
-
-//     if (!user.pharmacy) {
-//       return NextResponse.json(
-//         { error: "Pharmacy profile not found" },
-//         { status: 403 }
-//       );
-//     }
-
-//     const { searchParams } = new URL(request.url);
-
-//     // Add pagination parameters
-//     const page = parseInt(searchParams.get("page") || "1") || 1;
-//     const limit = parseInt(searchParams.get("limit") || "10") || 10;
-//     const skip = (page - 1) * limit;
-
-//     // Add filtering options
-//     const patientId = searchParams.get("patientId");
-//     const status = searchParams.get("status");
-//     const dateFrom = searchParams.get("dateFrom");
-//     const dateTo = searchParams.get("dateTo");
-
-//     // Build where clause
-//     const where: any = { pharmacyId: user.pharmacy.id };
-
-//     if (patientId) {
-//       where.patientId = patientId;
-//     }
-
-//     if (status) {
-//       where.status = status;
-//     }
-
-//     if (dateFrom || dateTo) {
-//       where.createdAt = {};
-//       if (dateFrom) where.createdAt.gte = new Date(dateFrom);
-//       if (dateTo) where.createdAt.lte = new Date(dateTo);
-//     }
-
-//     const [orders, totalCount] = await Promise.all([
-//       prisma.order.findMany({
-//         where,
-//         include: {
-//           items: true,
-//           Patient: {
-//             include: {
-//               user: {
-//                 select: {
-//                   email: true,
-//                   phone: true,
-//                   username: true,
-//                 },
-//               },
-//             },
-//           },
-//           pharmacy: true,
-//           prescription: true,
-//           payment: true,
-//           delivery: true,
-//         },
-//         orderBy: { createdAt: "desc" },
-//         skip,
-//         take: limit,
-//       }),
-//       prisma.order.count({ where }),
-//     ]);
-
-//     return NextResponse.json({
-//       data: orders,
-//       pagination: {
-//         total: totalCount,
-//         page,
-//         limit,
-//         totalPages: Math.ceil(totalCount / limit),
-//       },
-//     });
-//   } catch (error) {
-//     console.error("[ORDERS_GET]", error);
-//     return NextResponse.json(
-//       { error: "Failed to fetch orders. Please try again." },
-//       { status: 500 }
-//     );
-//   }
-// }

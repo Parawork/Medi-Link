@@ -12,7 +12,7 @@ export async function POST(request: Request) {
 
     // 2. Validate request body
     const body = await request.json();
-    const { patientId, pharmacyId, fileUrl } = body;
+    const { patientId, pharmacyId, fileUrl, instructions } = body;
 
     if (!patientId || !pharmacyId || !fileUrl) {
       return NextResponse.json(
@@ -39,12 +39,13 @@ export async function POST(request: Request) {
       );
     }
 
-    // 5. Create prescription record
+    // 5. Create prescription record with instructions
     const prescription = await prisma.prescription.create({
       data: {
         patientId,
         pharmacyId,
         fileUrl,
+        instructions: instructions || "", // Include instructions field
       },
       include: {
         patient: {

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
 
 interface OrderItem {
   name: string;
@@ -17,6 +18,7 @@ export function OrderForm({ prescription }: { prescription: string }) {
   const [items, setItems] = useState<OrderItem[]>([
     { name: "", price: "", quantity: "1" },
   ]);
+  const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Calculate total amount by parsing the string values
@@ -71,6 +73,7 @@ export function OrderForm({ prescription }: { prescription: string }) {
           body: JSON.stringify({
             prescriptionId: prescription,
             items: itemsToSubmit, // Use the converted items
+            notes: notes, // Include notes in the request
           }),
         });
 
@@ -166,6 +169,15 @@ export function OrderForm({ prescription }: { prescription: string }) {
         <div className="text-lg font-semibold">
           Total: LKR {totalAmount.toFixed(2)}
         </div>
+      </div>
+      <div className="space-y-2">
+        <label className="block text-sm font-medium mb-1">Notes</label>
+        <Textarea
+          placeholder="Add any additional notes or instructions for this order"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          className="min-h-24"
+        />
       </div>
       <div className="pt-4 border-t">
         <Button
