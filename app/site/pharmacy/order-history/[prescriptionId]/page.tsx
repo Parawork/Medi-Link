@@ -74,7 +74,7 @@ export default async function ReviewOrder({
     <div className="max-w-4xl mx-auto py-8 space-y-8">
       <div className="space-y-2">
         <h1 className="text-2xl font-bold">
-          Create Order by Assinging Medications
+          Create Order by Assigning Medications
         </h1>
         <p className="text-gray-600">Prescription ID: {prescriptionId}</p>
       </div>
