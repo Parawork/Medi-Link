@@ -1,7 +1,7 @@
 import { requireUser } from "@/lib/requireUser";
 import { PharmacyProfileForm } from "../../components/pharmacy/PharmacyProfileForm";
 import { prisma } from "@/app/utils/db";
-import UploadLocation from "@/app/components/pharmacy/UploadLocation";
+import UploadLocation from "../../components/pharmacy/UploadLocation";
 
 export default async function PharmacyProfilePage() {
   const user = await requireUser("PHARMACY");
