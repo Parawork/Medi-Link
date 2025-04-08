@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
+
 import { Button } from "@/components/ui/button";
 import ImageUpload from "./ImageUpload";
 
@@ -19,14 +20,18 @@ const PrescriptionUploadClient: React.FC<PrescriptionUploadClientProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
+  const { toast } = useToast();
+
   const handleSubmit = async () => {
     if (!fileUrl) {
-      toast.error("Please upload a prescription file");
+      toast({
+        title: "Error",
+        description: "Please upload a prescription file",
+        variant: "destructive",
+      });
       return;
     }
-
     setIsSubmitting(true);
-
     try {
       const response = await fetch("/api/patient/uploadPrescription", {
         method: "POST",
@@ -39,18 +44,22 @@ const PrescriptionUploadClient: React.FC<PrescriptionUploadClientProps> = ({
           fileUrl,
         }),
       });
-
       if (!response.ok) {
         throw new Error("Failed to create prescription");
       }
-
       const data = await response.json();
-
-      toast.success("Prescription uploaded successfully");
+      toast({
+        title: "Success",
+        description: "Prescription uploaded successfully",
+      });
       router.push(`/site/patient/`);
     } catch (error) {
       console.error("Error uploading prescription:", error);
-      toast.error("Failed to upload prescription. Please try again.");
+      toast({
+        title: "Error",
+        description: "Failed to upload prescription. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }

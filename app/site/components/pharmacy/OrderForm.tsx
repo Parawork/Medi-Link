@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 
 interface OrderItem {
   name: string;
@@ -48,6 +48,8 @@ export function OrderForm({ prescription }: { prescription: string }) {
     setItems(newItems);
   };
 
+  const { toast } = useToast();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -79,20 +81,19 @@ export function OrderForm({ prescription }: { prescription: string }) {
         const data = await response.json();
         resolve(data);
         router.push("/site/pharmacy/order-history");
+        toast({
+          title: "Success",
+          description: `Order has been created successfully`,
+        });
       } catch (error) {
-        console.error("Error creating order:", error);
-        reject(error);
+        toast({
+          title: "Error",
+          description: "Failed to create order. Please try again.",
+          variant: "destructive",
+        });
       } finally {
         setIsSubmitting(false);
       }
-    });
-
-    toast.promise(createOrderPromise, {
-      loading: "Creating order...",
-      success: (data: any) => {
-        return `Order #${data.id} has been created successfully`;
-      },
-      error: "Failed to create order. Please try again.",
     });
   };
 
