@@ -35,7 +35,7 @@ export default async function CustomerDashboard() {
   });
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-white w-screen">
       <main className="flex-1 p-6">
         <div className="flex justify-center gap-4 mb-8">
           <Link href="/site/patient/search-pharmacies">
