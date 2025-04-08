@@ -132,11 +132,11 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-8 text-center text-xs text-gray-500 flex justify-center space-x-4">
-          <Link href="/privacy-policy" className="hover:underline">
+          <Link href="/login" className="hover:underline">
             Privacy Policy
           </Link>
           <span>|</span>
-          <Link href="/terms-and-conditions" className="hover:underline">
+          <Link href="/login" className="hover:underline">
             Terms and Conditions
           </Link>
         </div>
