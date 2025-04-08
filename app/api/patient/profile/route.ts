@@ -42,11 +42,6 @@ export async function PUT(req: Request) {
       }
     }
 
-    console.log("Updating patient profile with data:", {
-      ...data,
-      dateOfBirth: dateOfBirth?.toISOString(),
-    });
-
     const updatedPatient = await prisma.patient.update({
       where: { userId: user.id },
       data: {
