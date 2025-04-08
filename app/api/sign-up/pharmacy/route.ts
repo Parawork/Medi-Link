@@ -2,9 +2,6 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/app/utils/db";
 import { z } from "zod";
-import { writeFile } from "fs/promises";
-import path from "path";
-import fs from "fs/promises";
 
 const signupSchema = z
   .object({
@@ -31,7 +28,7 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
 
-    // Extract regular form data
+    // Extract form data
     const formDataObj = Object.fromEntries(formData.entries());
     const { confirmPassword, role, ...data } = formDataObj;
 
@@ -83,31 +80,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Handle file upload
-    const file = formData.get("licenseFile") as File | null;
-    if (!file) {
-      return NextResponse.json(
-        { error: "License file is required" },
-        { status: 400 }
-      );
-    }
-
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    // Create uploads directory if it doesn't exist
-    const uploadDir = path.join(process.cwd(), "public/uploads/licenses");
-    await fs.mkdir(uploadDir, { recursive: true });
-
-    // Generate unique filename
-    const timestamp = Date.now();
-    const ext = path.extname(file.name);
-    const filename = `${data.licenseNumber}-${timestamp}${ext}`;
-    const filePath = path.join(uploadDir, filename);
-
-    // Save file
-    await writeFile(filePath, buffer);
-
     const hashedPassword = await bcrypt.hash(data.password as string, 12);
 
     // Create user and pharmacy in a transaction
@@ -135,7 +107,6 @@ export async function POST(request: Request) {
           stateProvince: data.stateProvince as string,
           postalCode: data.postalCode as string,
           country: data.country as string,
-          licenseFile: `/uploads/licenses/${filename}`,
           verified: false, // Initially not verified
         },
       });

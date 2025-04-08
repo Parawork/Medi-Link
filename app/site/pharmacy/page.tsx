@@ -4,14 +4,47 @@ import { format } from "date-fns";
 import Image from "next/image";
 import Link from "next/link";
 
-const formatDate = (date: Date) => {
-  return new Date(date).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+const formatPrescriptionDate = (prismaDate: Date) => {
+  // 1. Get current time in Sri Lanka (UTC+5:30)
+  const now = new Date();
+
+  // 2. Prisma already converts MongoDB dates to JavaScript Date objects
+  const prescriptionDate = new Date(prismaDate);
+
+  // 3. Calculate time difference in local time
+  const diffMs = now.getTime() - prescriptionDate.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+  // 4. Check if date is today in Sri Lanka time
+  const isToday =
+    prescriptionDate.getDate() === now.getDate() &&
+    prescriptionDate.getMonth() === now.getMonth() &&
+    prescriptionDate.getFullYear() === now.getFullYear();
+
+  if (isToday) {
+    // Format as HH:mm in Sri Lanka time
+    return prescriptionDate.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Colombo",
+    });
+  } else if (diffMinutes < 60) {
+    return diffMinutes <= 1 ? "1 minute ago" : `${diffMinutes} minutes ago`;
+  } else if (diffHours < 24) {
+    return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`;
+  } else if (diffDays === 1) {
+    return "yesterday";
+  } else if (diffDays < 30) {
+    return `${diffDays} days ago`;
+  } else {
+    // Format as date in Sri Lanka
+    return prescriptionDate.toLocaleDateString("en-US", {
+      timeZone: "Asia/Colombo",
+    });
+  }
 };
 
 export default async function PharmacyDashboard() {
@@ -100,7 +133,7 @@ export default async function PharmacyDashboard() {
                       {order.Patient?.fullName || "Unknown"}
                     </p>
                     <p className="text-sm text-gray-600">
-                      Placed on: {formatDate(order.createdAt)}
+                      Placed on: {formatPrescriptionDate(order.createdAt)}
                     </p>
                   </div>
 

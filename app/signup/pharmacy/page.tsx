@@ -24,7 +24,6 @@ export default function PharmacySignupPage() {
     password: "",
     confirmPassword: "",
   });
-  const [licenseFile, setLicenseFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
@@ -32,12 +31,6 @@ export default function PharmacySignupPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setLicenseFile(e.target.files[0]);
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,15 +46,6 @@ export default function PharmacySignupPage() {
       return;
     }
 
-    if (!licenseFile) {
-      toast({
-        title: "Error",
-        description: "License document is required.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
 
     try {
@@ -72,8 +56,6 @@ export default function PharmacySignupPage() {
         formDataToSend.append(key, value);
       });
 
-      // Append the license file
-      formDataToSend.append("licenseFile", licenseFile);
       // Explicitly set role
       formDataToSend.append("role", "PHARMACY");
 
@@ -281,34 +263,6 @@ export default function PharmacySignupPage() {
                 required
                 className="w-full p-2 text-sm border border-gray-300 rounded-md"
               />
-            </div>
-
-            <div className="mt-4 space-y-1">
-              <label className="block text-xs text-[#0a2351]">
-                Upload Pharmacy License Document
-              </label>
-              <div
-                className="border border-dashed border-gray-300 rounded-md p-4 text-center cursor-pointer bg-gray-50"
-                onClick={() =>
-                  document.getElementById("license-upload")?.click()
-                }
-              >
-                <input
-                  id="license-upload"
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-                <div className="flex flex-col items-center justify-center">
-                  <Upload className="h-10 w-10 text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-500">
-                    {licenseFile
-                      ? licenseFile.name
-                      : "Drag & Drop Files or Browse"}
-                  </p>
-                </div>
-              </div>
             </div>
           </div>
 
