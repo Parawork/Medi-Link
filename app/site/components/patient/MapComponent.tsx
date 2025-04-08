@@ -745,7 +745,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
     <div className="mb-5 font-sans">
       <div className="flex h-[60vh] gap-5 mt-2.5">
         {/* Left sidebar with pharmacy list */}
-        <div className="flex-none w-120 bg-white rounded-2xl p-5 shadow-lg overflow-y-auto">
+        <div className="flex-none w-full sm:w-[30rem] bg-white rounded-2xl p-5 shadow-lg overflow-y-auto">
           <div className="flex justify-between items-center mb-3">
             <h2 className="m-0 text-[22px] text-gray-800 font-semibold">
               Nearby Pharmacies
@@ -865,7 +865,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         </div>
 
         {/* Main map area */}
-        <div className="flex-1 relative">
+        <div className="flex-1 relative hidden sm:block">
           <div
             id="map"
             ref={mapRef}
