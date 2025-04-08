@@ -28,6 +28,7 @@ interface MapComponentProps {
   latitude: number;
   longitude: number;
   size: number;
+  medicationAvailability?: string;
 }
 
 // Helper function to generate random availability
@@ -195,6 +196,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   latitude,
   longitude,
   size,
+  medicationAvailability,
 }) => {
   const [selectedPharmacy, setSelectedPharmacy] = useState<Pharmacy | null>(
     null
@@ -204,6 +206,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [filterOpen, setFilterOpen] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const [showOpenOnly, setShowOpenOnly] = useState<boolean>(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const hasLoadedPharmacies = useRef(false);
 
@@ -430,25 +433,67 @@ const MapComponent: React.FC<MapComponentProps> = ({
     setPharmacies(pharmaciesWithDistances);
   }
 
-  // Filtered pharmacies based on search
-  const filteredPharmacies = pharmacies.filter(
-    (pharmacy) =>
+  // Filtered pharmacies based on search and open status
+  const filteredPharmacies = pharmacies.filter((pharmacy) => {
+    const matchesSearch =
       pharmacy.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      formatAddress(pharmacy).toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      formatAddress(pharmacy).toLowerCase().includes(searchQuery.toLowerCase());
+
+    // Filter by medication availability if provided
+    const matchesAvailability =
+      !medicationAvailability ||
+      normalizeAvailability(pharmacy.availability) === medicationAvailability;
+
+    if (showOpenOnly) {
+      // Check if pharmacy is currently open based on openHours
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      const currentTime = currentHour * 60 + currentMinute;
+
+      // Simple check if pharmacy is open 24 hours
+      if (pharmacy.openHours?.toLowerCase().includes("24 hours")) {
+        return matchesSearch && matchesAvailability;
+      }
+
+      // For other hours, we'll assume they're open if they have hours listed
+      // This is a simplified approach - in a real app, you'd parse the hours properly
+      return (
+        matchesSearch &&
+        matchesAvailability &&
+        pharmacy.openHours &&
+        pharmacy.openHours.length > 0
+      );
+    }
+
+    return matchesSearch && matchesAvailability;
+  });
 
   // Initialize map
   useEffect(() => {
     if (!mapRef.current || !latitude || !longitude) return;
 
+    // Create a variable to track if the component is mounted
+    let isMounted = true;
+
     // Workaround for SSR and Leaflet compatibility
-    if (typeof window !== "undefined") {
+    if (typeof window === "undefined") return;
+
+    // Make sure Leaflet is available
+    if (!L || !L.map) {
+      console.error("Leaflet is not available");
+      return;
+    }
+
+    try {
       // Create map instance
       const map = L.map(mapRef.current, {
         zoomControl: false,
       }).setView([latitude, longitude], size);
 
-      setMapInstance(map);
+      if (isMounted) {
+        setMapInstance(map);
+      }
 
       // Add tile layer
       L.tileLayer(
@@ -464,7 +509,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
       // Add user marker
       const userIcon = L.divIcon({
-        html: `<div class="user-marker"><div class="pulse"></div></div>`,
+        html: `<div class="bg-[#4285F4] rounded-full h-4 w-4 relative shadow-[0_0_0_2px_white]">
+                <div class="bg-[#4285F4]/30 rounded-full h-[30px] w-[30px] absolute -top-[7px] -left-[7px] animate-pulse"></div>
+              </div>`,
         className: "user-location",
         iconSize: [20, 20],
       });
@@ -476,85 +523,61 @@ const MapComponent: React.FC<MapComponentProps> = ({
       (userMarker as any)._isUserMarker = true;
       userMarker.openPopup();
 
-      // Add styles
-      const style = document.createElement("style");
-      style.innerHTML = `
-        .user-marker {
-          background-color: #4285F4;
-          border-radius: 50%;
-          height: 16px;
-          width: 16px;
-          position: relative;
-          box-shadow: 0 0 0 2px white;
-        }
-        .pulse {
-          background-color: rgba(66, 133, 244, 0.3);
-          border-radius: 50%;
-          height: 30px;
-          width: 30px;
-          position: absolute;
-          top: -7px;
-          left: -7px;
-          animation: pulse 2s infinite;
-        }
-        .pharmacy-marker {
-          font-size: 22px;
-          text-align: center;
-          width: 36px;
-          height: 36px;
-          line-height: 36px;
-          background-color: white;
-          border-radius: 50%;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-        @keyframes pulse {
-          0% { transform: scale(0.8); opacity: 0.8; }
-          70% { transform: scale(1.5); opacity: 0; }
-          100% { transform: scale(0.8); opacity: 0; }
-        }
-        /* Custom popup styles */
-        .leaflet-popup-content-wrapper {
-          border-radius: 8px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .leaflet-popup-content {
-          margin: 10px 14px;
-          line-height: 1.5;
-        }
-        .leaflet-container a.leaflet-popup-close-button {
-          color: #666;
-          padding: 8px 10px 0 0;
-        }
-        /* Zoom control */
-        .leaflet-control-zoom {
-          border: none !important;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
-        }
-        .leaflet-control-zoom a {
-          background-color: white !important;
-          color: #333 !important;
-        }
-      `;
-      document.head.appendChild(style);
+      // Wait for map to be ready
+      map.whenReady(() => {
+        if (!isMounted) return;
 
-      // Add pharmacy markers
-      if (pharmacies.length > 0) {
-        addPharmacyMarkers(map);
-      }
+        // Add pharmacy markers only after map is fully ready
+        if (
+          pharmacies.length > 0 &&
+          map.getContainer() &&
+          map.getPane("markerPane")
+        ) {
+          // Direct check with try/catch
+          try {
+            // Use a small delay to ensure map is fully initialized
+            setTimeout(() => {
+              if (
+                isMounted &&
+                map.getContainer() &&
+                map.getPane("markerPane")
+              ) {
+                addMarkersToMap(map);
+              }
+            }, 100);
+          } catch (error) {
+            console.error("Error adding markers on initial load:", error);
+          }
+        }
+      });
 
       // Cleanup
       return () => {
-        map.remove();
-        document.head.removeChild(style);
+        isMounted = false;
+        try {
+          if (map) {
+            map.remove();
+          }
+        } catch (e) {
+          console.error("Error removing map:", e);
+        }
         setMapInstance(null);
       };
+    } catch (error) {
+      console.error("Error initializing map:", error);
     }
   }, [latitude, longitude, size]);
 
-  // Function to add pharmacy markers to map
-  const addPharmacyMarkers = useCallback(
-    (map: L.Map) => {
-      if (!map || pharmacies.length === 0) return;
+  // Function to add markers directly to the map
+  const addMarkersToMap = (map: L.Map) => {
+    if (!map || pharmacies.length === 0) return;
+
+    try {
+      // Make sure the map container exists and is properly initialized
+      if (!map.getContainer() || !map.getPane("markerPane")) {
+        console.warn("Map container or marker pane not ready yet");
+        return;
+      }
 
       // Clear existing markers
       map.eachLayer((layer) => {
@@ -565,36 +588,90 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
       // Add new markers
       pharmacies.forEach((pharmacy) => {
-        const pharmacyIcon = L.divIcon({
-          html: `<div class="pharmacy-marker">💊</div>`,
-          className: "pharmacy-icon",
-          iconSize: [36, 36],
-        });
-
-        const lat = pharmacy.geoLocation?.latitude ?? latitude;
-        const lng = pharmacy.geoLocation?.longitude ?? longitude;
-
-        L.marker([lat, lng], { icon: pharmacyIcon })
-          .addTo(map)
-          .bindPopup(
-            `
-          <div style="font-family: system-ui, sans-serif;">
-            <div style="font-weight: 600; font-size: 16px; margin-bottom: 4px;">${
-              pharmacy.name
-            }</div>
-            <div style="font-size: 13px; color: #666; margin-bottom: 6px;">${formatAddress(
-              pharmacy
-            )}</div>
-            <div style="font-size: 13px; color: #4285F4; font-weight: 500;">${
-              pharmacy.distance
-            } away</div>
-          </div>
-        `
-          )
-          .on("click", () => {
-            setSelectedPharmacy(pharmacy);
+        try {
+          const pharmacyIcon = L.divIcon({
+            html: `<div class="bg-white rounded-full h-9 w-9 flex items-center justify-center shadow-md text-2xl">💊</div>`,
+            className: "pharmacy-icon",
+            iconSize: [36, 36],
           });
+
+          const lat = pharmacy.geoLocation?.latitude ?? latitude;
+          const lng = pharmacy.geoLocation?.longitude ?? longitude;
+
+          if (
+            typeof lat !== "number" ||
+            typeof lng !== "number" ||
+            isNaN(lat) ||
+            isNaN(lng)
+          ) {
+            console.error("Invalid coordinates for pharmacy:", pharmacy);
+            return;
+          }
+
+          // Create marker but don't add it to the map yet
+          const marker = L.marker([lat, lng], { icon: pharmacyIcon });
+
+          // Only add to map if the map is still valid
+          if (map && map.getContainer() && map.getPane("markerPane")) {
+            marker
+              .addTo(map)
+              .bindPopup(
+                `
+              <div class="font-sans">
+                <div class="font-semibold text-base mb-1">${pharmacy.name}</div>
+                <div class="text-sm text-gray-600 mb-1.5">${formatAddress(
+                  pharmacy
+                )}</div>
+                <div class="text-sm text-[#4285F4] font-medium">${
+                  pharmacy.distance
+                } away</div>
+              </div>
+            `
+              )
+              .on("click", () => {
+                setSelectedPharmacy(pharmacy);
+              });
+          } else {
+            console.warn("Map not ready for marker addition");
+          }
+        } catch (markerError) {
+          console.error(
+            "Error creating marker for pharmacy:",
+            pharmacy,
+            markerError
+          );
+        }
       });
+    } catch (error) {
+      console.error("Error in addMarkersToMap:", error);
+    }
+  };
+
+  // Function to add pharmacy markers to map - safer callback version
+  const addPharmacyMarkers = useCallback(
+    (map: L.Map | null) => {
+      if (!map) return;
+
+      // Check if map is fully initialized
+      if (!map.getContainer() || !map.getPane("markerPane")) {
+        console.warn("Map not fully initialized yet, waiting...");
+        // Try again after a short delay
+        setTimeout(() => addPharmacyMarkers(map), 100);
+        return;
+      }
+
+      // Delay marker addition to ensure map is ready
+      setTimeout(() => {
+        try {
+          if (map && map.getContainer() && map.getPane("markerPane")) {
+            addMarkersToMap(map);
+          } else {
+            console.warn("Map not ready for markers after delay");
+          }
+        } catch (error) {
+          console.error("Error in delayed addPharmacyMarkers:", error);
+        }
+      }, 300); // Increased delay to ensure map is fully initialized
     },
     [pharmacies, latitude, longitude]
   );
@@ -602,7 +679,28 @@ const MapComponent: React.FC<MapComponentProps> = ({
   // Update markers when pharmacies change
   useEffect(() => {
     if (mapInstance && pharmacies.length > 0) {
-      addPharmacyMarkers(mapInstance);
+      // Use a longer delay to ensure the map is fully initialized
+      const timer = setTimeout(() => {
+        if (mapInstance) {
+          try {
+            // Check if map is fully initialized before adding markers
+            if (
+              mapInstance.getContainer() &&
+              mapInstance.getPane("markerPane")
+            ) {
+              addPharmacyMarkers(mapInstance);
+            } else {
+              console.warn("Map not fully initialized, retrying...");
+              // Try again after a short delay
+              setTimeout(() => addPharmacyMarkers(mapInstance), 200);
+            }
+          } catch (error) {
+            console.error("Failed to add pharmacy markers:", error);
+          }
+        }
+      }, 500); // Increased delay to ensure map is fully initialized
+
+      return () => clearTimeout(timer);
     }
   }, [mapInstance, pharmacies, addPharmacyMarkers]);
 
@@ -644,14 +742,16 @@ const MapComponent: React.FC<MapComponentProps> = ({
   }, [mapInstance, latitude, longitude, size]);
 
   return (
-    <div className="map-container">
-      <div className="map-layout">
+    <div className="mb-5 font-sans">
+      <div className="flex h-[60vh] gap-5 mt-2.5">
         {/* Left sidebar with pharmacy list */}
-        <div className="pharmacy-sidebar">
-          <div className="sidebar-header">
-            <h2 className="sidebar-title">Nearby Pharmacies</h2>
+        <div className="flex-none w-full sm:w-[30rem] bg-white rounded-2xl p-5 shadow-lg overflow-y-auto">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="m-0 text-[22px] text-gray-800 font-semibold">
+              Nearby Pharmacies
+            </h2>
             <div
-              className="filter-toggle"
+              className="text-sm text-[#4285f4] cursor-pointer font-medium hover:underline"
               onClick={() => setFilterOpen(!filterOpen)}
             >
               {filterOpen ? "Hide Filters" : "Show Filters"}
@@ -659,90 +759,131 @@ const MapComponent: React.FC<MapComponentProps> = ({
           </div>
 
           {filterOpen && (
-            <div className="filter-section">
-              <div className="search-box">
+            <div className="bg-gray-50 rounded-xl p-3.5 mb-4">
+              <div className="relative mb-3">
                 <input
                   type="text"
                   placeholder="Search pharmacies..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full py-2.5 px-3 rounded-lg border border-gray-200 text-sm"
                 />
-                <div className="search-icon">🔍</div>
+                <div className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-sm">
+                  🔍
+                </div>
               </div>
 
-              <div className="filter-options">
-                <div className="filter-option selected">All</div>
-                <div className="filter-option">Open</div>
+              <div className="flex gap-2">
+                <div
+                  className={`flex-1 text-center py-2 px-2 rounded-md text-sm cursor-pointer border transition-colors ${
+                    !showOpenOnly
+                      ? "bg-blue-50 text-blue-600 border-blue-200 font-medium"
+                      : "bg-white border-gray-100 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setShowOpenOnly(false)}
+                >
+                  All
+                </div>
+                <div
+                  className={`flex-1 text-center py-2 px-2 rounded-md text-sm cursor-pointer border transition-colors ${
+                    showOpenOnly
+                      ? "bg-blue-50 text-blue-600 border-blue-200 border-blue-200 font-medium"
+                      : "bg-white border-gray-100 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setShowOpenOnly(true)}
+                >
+                  Open
+                </div>
               </div>
             </div>
           )}
 
-          <p className="subtitle">
-            Found {filteredPharmacies.length} pharmacies near you
+          <p className="m-0 mb-4 text-gray-500 text-sm">
+            Found {filteredPharmacies.length}{" "}
+            {filteredPharmacies.length === 1 ? "pharmacy" : "pharmacies"} near
+            you
           </p>
 
-          <div className="pharmacy-list">
-            {filteredPharmacies.map((pharmacy) => (
-              <div
-                key={pharmacy.id}
-                className={`pharmacy-card ${
-                  selectedPharmacy?.id === pharmacy.id ? "selected" : ""
-                }`}
-                onClick={() => handleSelectPharmacy(pharmacy)}
-              >
-                <div className="pharmacy-card-icon">💊</div>
-                <div className="pharmacy-details">
-                  <div className="pharmacy-header">
-                    <h3>{pharmacy.name}</h3>
-                    <div
-                      className="availability-badge"
-                      style={{
-                        backgroundColor: getAvailabilityColor(
-                          normalizeAvailability(pharmacy.availability)
-                        ),
-                      }}
-                    >
-                      {normalizeAvailability(pharmacy.availability)}
+          <div className="flex flex-col gap-3.5">
+            {filteredPharmacies.length > 0 ? (
+              filteredPharmacies.map((pharmacy) => (
+                <div
+                  key={pharmacy.id}
+                  className={`flex items-start gap-3.5 p-4 rounded-xl cursor-pointer transition-all duration-200 hover:translate-y-[-2px] hover:shadow-md ${
+                    selectedPharmacy?.id === pharmacy.id
+                      ? "bg-blue-50 border border-blue-200"
+                      : "bg-gray-50 border border-transparent hover:bg-gray-100"
+                  }`}
+                  onClick={() => handleSelectPharmacy(pharmacy)}
+                >
+                  <div className="bg-white w-10 h-10 flex items-center justify-center rounded-lg text-2xl shadow-sm">
+                    💊
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start mb-1">
+                      <h3 className="m-0 mb-1 text-base font-semibold truncate pr-2">
+                        {pharmacy.name}
+                      </h3>
+                      <div
+                        className="text-xs py-0.5 px-1.5 rounded text-white font-medium whitespace-nowrap"
+                        style={{
+                          backgroundColor: getAvailabilityColor(
+                            normalizeAvailability(pharmacy.availability)
+                          ),
+                        }}
+                      >
+                        {normalizeAvailability(pharmacy.availability)}
+                      </div>
+                    </div>
+                    <p className="m-0 mb-2 text-sm text-gray-600 leading-tight truncate">
+                      {pharmacy.streetAddress}
+                    </p>
+                    <div className="flex justify-between text-xs">
+                      <div className="flex flex-col text-[#4285f4] font-medium">
+                        <span className="whitespace-nowrap">
+                          {pharmacy.distance} away
+                        </span>
+                        <span className="font-normal text-[11px] text-gray-500 mt-0.5 whitespace-nowrap">
+                          {estimateTravelTime(
+                            parseDistanceValue(pharmacy.distance || "0 km")
+                          )}
+                        </span>
+                      </div>
+                      <div className="text-gray-500 whitespace-nowrap">
+                        {pharmacy.openHours}
+                      </div>
                     </div>
                   </div>
-                  <p className="pharmacy-address">{pharmacy.streetAddress}</p>
-                  <div className="pharmacy-footer">
-                    <p className="pharmacy-distance">
-                      {pharmacy.distance} away
-                      <span className="travel-time">
-                        {estimateTravelTime(
-                          parseDistanceValue(pharmacy.distance || "0 km")
-                        )}
-                      </span>
-                    </p>
-                    <p className="pharmacy-hours">{pharmacy.openHours}</p>
-                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-6 text-gray-500">
+                No pharmacies found matching your criteria
               </div>
-            ))}
+            )}
           </div>
         </div>
 
         {/* Main map area */}
-        <div className="map-area">
+        <div className="flex-1 relative hidden sm:block">
           <div
             id="map"
             ref={mapRef}
-            style={{
-              height: "100%",
-              borderRadius: "12px",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-            }}
+            className="h-full rounded-xl shadow-lg"
           ></div>
 
-          <div className="map-overlay">
-            <div className="map-legend">
-              <div className="legend-item">
-                <div className="legend-icon user">You</div>
+          <div className="absolute bottom-5 left-5 z-[1000]">
+            <div className="bg-white/90 py-2 px-3 rounded-lg shadow-md flex gap-3.5">
+              <div className="flex items-center gap-1.5 text-xs">
+                <div className="flex items-center justify-center w-6 h-6 rounded-full bg-[#4285f4] text-white text-[10px] font-bold">
+                  You
+                </div>
                 <span>Your Location</span>
               </div>
-              <div className="legend-item">
-                <div className="legend-icon pharmacy">💊</div>
+              <div className="flex items-center gap-1.5 text-xs">
+                <div className="flex items-center justify-center w-6 h-6 rounded-full bg-white shadow text-sm">
+                  💊
+                </div>
                 <span>Pharmacy</span>
               </div>
             </div>
@@ -753,7 +894,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
       {/* Selected pharmacy details panel */}
       {selectedPharmacy && (
         <div
-          className="pharmacy-details-panel"
+          className="bg-white rounded-2xl p-5 mt-5 shadow-lg cursor-pointer"
           onClick={(e) => {
             // Only navigate if not clicking on a button
             if (!(e.target as HTMLElement).closest("button")) {
@@ -761,11 +902,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
             }
           }}
         >
-          <div className="details-header">
+          <div className="flex justify-between items-start mb-5">
             <div>
-              <h2>{selectedPharmacy.name}</h2>
+              <h2 className="m-0 mb-2 text-[22px] font-semibold">
+                {selectedPharmacy.name}
+              </h2>
               <div
-                className="availability"
+                className="inline-block py-1 px-2.5 rounded-md text-sm font-medium text-white"
                 style={{
                   backgroundColor: getAvailabilityColor(
                     normalizeAvailability(selectedPharmacy.availability)
@@ -777,7 +920,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
               </div>
             </div>
             <button
-              className="close-btn"
+              className="bg-gray-100 border-none text-2xl w-9 h-9 rounded-full flex items-center justify-center cursor-pointer text-gray-500 hover:bg-gray-200"
               onClick={(e) => {
                 e.stopPropagation(); // Stop event from propagating to parent
                 handleViewAll();
@@ -787,45 +930,63 @@ const MapComponent: React.FC<MapComponentProps> = ({
             </button>
           </div>
 
-          <div className="details-content">
-            <div className="detail-item">
-              <div className="detail-icon">📍</div>
-              <div>
-                <span className="detail-label">Address</span>
-                <div className="detail-value">
+          <div className="grid grid-cols-2 gap-5 mb-5">
+            <div className="flex items-start gap-3">
+              <div className="text-2xl w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                📍
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm text-gray-500 mb-1">
+                  Address
+                </span>
+                <div className="text-base text-gray-800 font-medium truncate">
                   {selectedPharmacy.streetAddress}
                 </div>
               </div>
             </div>
-            <div className="detail-item">
-              <div className="detail-icon">🚶</div>
-              <div>
-                <span className="detail-label">Distance</span>
-                <div className="detail-value">{selectedPharmacy.distance}</div>
-                <div className="detail-travel-time">
+            <div className="flex items-start gap-3">
+              <div className="text-2xl w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                🚶
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm text-gray-500 mb-1">
+                  Distance
+                </span>
+                <div className="text-base text-gray-800 font-medium">
+                  {selectedPharmacy.distance}
+                </div>
+                <div className="text-sm text-gray-500 mt-0.5">
                   {estimateTravelTime(
                     parseDistanceValue(selectedPharmacy.distance || "0 km")
                   )}
                 </div>
               </div>
             </div>
-            <div className="detail-item">
-              <div className="detail-icon">🕒</div>
-              <div>
-                <span className="detail-label">Hours</span>
-                <div className="detail-value">{selectedPharmacy.openHours}</div>
+            <div className="flex items-start gap-3">
+              <div className="text-2xl w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                🕒
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm text-gray-500 mb-1">Hours</span>
+                <div className="text-base text-gray-800 font-medium truncate">
+                  {selectedPharmacy.openHours}
+                </div>
               </div>
             </div>
-            <div className="detail-item">
-              <div className="detail-icon">📞</div>
-              <div>
-                <span className="detail-label">Phone</span>
-                <div className="detail-value">{selectedPharmacy.phone}</div>
+            <div className="flex items-start gap-3">
+              <div className="text-2xl w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                📞
+              </div>
+              <div className="min-w-0">
+                <span className="block text-sm text-gray-500 mb-1">Phone</span>
+                <div className="text-base text-gray-800 font-medium truncate">
+                  {selectedPharmacy.phone}
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="details-actions">
+          <div className="flex gap-3">
             <button
               onClick={(e) => {
                 e.stopPropagation(); // Stop event from propagating to parent
@@ -848,349 +1009,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
           </div>
         </div>
       )}
-
-      <style jsx>{`
-        .map-container {
-          position: relative;
-          margin-bottom: 20px;
-          font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-            Roboto, sans-serif;
-        }
-        .map-layout {
-          display: flex;
-          height: 60vh;
-          gap: 20px;
-          margin-top: 10px;
-        }
-        .pharmacy-sidebar {
-          flex: 0 0 320px;
-          background: white;
-          border-radius: 16px;
-          padding: 20px;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-          overflow-y: auto;
-          height: 100%;
-        }
-        .sidebar-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 12px;
-        }
-        .sidebar-title {
-          margin: 0;
-          font-size: 22px;
-          color: #333;
-          font-weight: 600;
-        }
-        .filter-toggle {
-          font-size: 13px;
-          color: #4285f4;
-          cursor: pointer;
-          font-weight: 500;
-        }
-        .filter-toggle:hover {
-          text-decoration: underline;
-        }
-        .filter-section {
-          background: #f8f9fa;
-          border-radius: 12px;
-          padding: 14px;
-          margin-bottom: 16px;
-        }
-        .search-box {
-          position: relative;
-          margin-bottom: 12px;
-        }
-        .search-box input {
-          width: 100%;
-          padding: 10px 36px 10px 12px;
-          border-radius: 8px;
-          border: 1px solid #ddd;
-          font-size: 14px;
-        }
-        .search-icon {
-          position: absolute;
-          right: 10px;
-          top: 50%;
-          transform: translateY(-50%);
-          font-size: 14px;
-        }
-        .filter-options {
-          display: flex;
-          gap: 8px;
-        }
-        .filter-option {
-          flex: 1;
-          text-align: center;
-          padding: 8px;
-          background: white;
-          border-radius: 6px;
-          font-size: 13px;
-          cursor: pointer;
-          border: 1px solid #eee;
-        }
-        .filter-option.selected {
-          background: #e8f0fe;
-          color: #1a73e8;
-          border-color: #c2dbff;
-          font-weight: 500;
-        }
-        .subtitle {
-          margin: 0 0 16px 0;
-          color: #666;
-          font-size: 14px;
-        }
-        .pharmacy-list {
-          display: flex;
-          flex-direction: column;
-          gap: 14px;
-        }
-        .pharmacy-card {
-          display: flex;
-          align-items: flex-start;
-          gap: 14px;
-          padding: 16px;
-          border-radius: 12px;
-          background: #f9f9f9;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          border: 1px solid transparent;
-        }
-        .pharmacy-card:hover {
-          background: #f3f3f3;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-        }
-        .pharmacy-card.selected {
-          background: #e8f0fe;
-          border: 1px solid #c2dbff;
-        }
-        .pharmacy-card-icon {
-          background: white;
-          width: 40px;
-          height: 40px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 10px;
-          font-size: 22px;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-        }
-        .pharmacy-details {
-          flex: 1;
-        }
-        .pharmacy-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin-bottom: 4px;
-        }
-        .pharmacy-details h3 {
-          margin: 0 0 4px 0;
-          font-size: 16px;
-          font-weight: 600;
-        }
-        .availability-badge {
-          font-size: 11px;
-          padding: 2px 6px;
-          border-radius: 4px;
-          color: white;
-          font-weight: 500;
-        }
-        .pharmacy-address {
-          margin: 0 0 8px 0;
-          font-size: 13px;
-          color: #666;
-          line-height: 1.4;
-        }
-        .pharmacy-footer {
-          display: flex;
-          justify-content: space-between;
-          font-size: 12px;
-        }
-        .pharmacy-distance {
-          margin: 0;
-          color: #4285f4;
-          font-weight: 500;
-          display: flex;
-          flex-direction: column;
-        }
-        .travel-time {
-          font-size: 11px;
-          font-weight: normal;
-          color: #666;
-          margin-top: 2px;
-        }
-        .pharmacy-hours {
-          margin: 0;
-          color: #666;
-        }
-        .map-area {
-          flex: 1;
-          height: 100%;
-          position: relative;
-        }
-        .map-overlay {
-          position: absolute;
-          bottom: 20px;
-          left: 20px;
-          z-index: 1000;
-        }
-        .map-legend {
-          background: rgba(255, 255, 255, 0.9);
-          padding: 8px 12px;
-          border-radius: 8px;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-          display: flex;
-          gap: 14px;
-        }
-        .legend-item {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 12px;
-        }
-        .legend-icon {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 24px;
-          height: 24px;
-          border-radius: 50%;
-          font-size: 14px;
-        }
-        .legend-icon.user {
-          background: #4285f4;
-          color: white;
-          font-size: 10px;
-          font-weight: bold;
-        }
-        .legend-icon.pharmacy {
-          background: white;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-        }
-        .pharmacy-details-panel {
-          background: white;
-          border-radius: 16px;
-          padding: 20px;
-          margin-top: 20px;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        }
-        .details-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin-bottom: 20px;
-        }
-        .details-header h2 {
-          margin: 0 0 8px 0;
-          font-size: 22px;
-          font-weight: 600;
-        }
-        .availability {
-          display: inline-block;
-          padding: 4px 10px;
-          border-radius: 6px;
-          font-size: 13px;
-          font-weight: 500;
-          color: white;
-        }
-        .close-btn {
-          background: #f3f3f3;
-          border: none;
-          font-size: 24px;
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          color: #666;
-          line-height: 1;
-        }
-        .close-btn:hover {
-          background: #e5e5e5;
-        }
-        .details-content {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 20px;
-          margin-bottom: 20px;
-        }
-        .detail-item {
-          display: flex;
-          align-items: flex-start;
-          gap: 12px;
-        }
-        .detail-icon {
-          font-size: 20px;
-          width: 36px;
-          height: 36px;
-          border-radius: 8px;
-          background: #f5f5f5;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .detail-label {
-          display: block;
-          font-size: 13px;
-          color: #666;
-          margin-bottom: 4px;
-        }
-        .detail-value {
-          font-size: 15px;
-          color: #333;
-          font-weight: 500;
-        }
-        .detail-travel-time {
-          font-size: 12px;
-          color: #666;
-          margin-top: 2px;
-        }
-        .details-actions {
-          display: flex;
-          gap: 12px;
-        }
-        .directions-btn,
-        .call-btn {
-          flex: 1;
-          border: none;
-          padding: 12px;
-          border-radius: 10px;
-          cursor: pointer;
-          font-size: 15px;
-          font-weight: 500;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          transition: all 0.2s ease;
-        }
-        .directions-btn {
-          background: #4285f4;
-          color: white;
-        }
-        .directions-btn:hover {
-          background: #3b78e7;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 8px rgba(66, 133, 244, 0.3);
-        }
-        .call-btn {
-          background: #34a853;
-          color: white;
-        }
-        .call-btn:hover {
-          background: #2e9549;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 8px rgba(52, 168, 83, 0.3);
-        }
-        .btn-icon {
-          font-size: 18px;
-        }
-      `}</style>
     </div>
   );
 };
