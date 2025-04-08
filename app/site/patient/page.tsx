@@ -32,7 +32,7 @@ export default async function CustomerDashboard() {
   });
 
   return (
-    <div className="flex flex-col min-h-screen bg-white w-full items-center p-1">
+    <div className="flex flex-col min-h-screen bg-white w-full p-1">
       <main className="flex-1">
         <div className="flex justify-center gap-4 mb-8">
           <Link href="/site/patient/search-pharmacies">
