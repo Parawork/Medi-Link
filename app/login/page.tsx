@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -12,8 +12,34 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
   const router = useRouter();
   const { toast } = useToast();
+
+  // Check if user is already logged in on component mount
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const response = await fetch("/api/auth/session");
+        const session = await response.json();
+
+        // If user is logged in and has a role, redirect them
+        if (session && session.user && session.user.role) {
+          const redirectPath =
+            session.user.role === "PHARMACY"
+              ? "/site/pharmacy"
+              : "/site/patient";
+          router.push(redirectPath);
+        }
+      } catch (error) {
+        console.error("Error checking session:", error);
+      } finally {
+        setIsCheckingSession(false);
+      }
+    };
+
+    checkSession();
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +91,17 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+
+  // Show loading state while checking session
+  if (isCheckingSession) {
+    return (
+      <div className="min-h-screen bg-[#0a2351] flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-white rounded-3xl p-8 shadow-lg text-center">
+          <p className="text-[#0a2351]">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0a2351] flex items-center justify-center p-4">
