@@ -224,7 +224,7 @@ export default async function PharmacyPrescriptionsPage({
               No prescriptions found
             </h3>
             <p className="text-xs md:text-sm mt-1">
-              When you have prescriptions, they'll appear here
+              {`When you have prescriptions, they'll appear here`}
             </p>
           </div>
         )}

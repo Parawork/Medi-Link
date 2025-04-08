@@ -56,7 +56,7 @@ export default async function OrderList({
           No {status.toLowerCase()} orders
         </h3>
         <p className="text-sm mt-1">
-          When you have orders, they'll appear here
+          {`When you have orders, they'll appear here`}
         </p>
       </div>
     );
