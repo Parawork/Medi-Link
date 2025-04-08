@@ -8,11 +8,10 @@ Our project aims to develop a web application that connects patients with nearby
 
 ## Tech stack
 - **Frontend:** Next.js 
-- **Backend:** Node.js 
-- **Database:** Supabase
-- **Authentication:** NextAuth authentication 
-- **Payment Integration:** Stripe API  
-- **Geo-location Services:** Google Maps API  
+- **Backend:** Next.js 
+- **Database:** MongoDB
+- **Authentication:** NextAuth authentication  
+- **Geo-location Services:** Leaflet API  
 - **Third-party Delivery API:** Uber / Pickme API
 
 ## Links
