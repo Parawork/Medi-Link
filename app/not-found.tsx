@@ -174,7 +174,7 @@ export default function NotFound() {
           </Link>
 
           <Link
-            href="/site/patient/locate-pharmacies"
+            href="/"
             className="group relative px-8 py-4 bg-white text-blue-500 border-2 border-blue-500 rounded-full font-medium overflow-hidden transition-all duration-300 hover:bg-blue-50 hover:scale-105"
           >
             <span className="relative z-10 flex items-center gap-2">
