@@ -4,7 +4,22 @@ Bridging Patients &amp; Pharmacies Effortlessly
 ## Project
 Our project aims to develop a web application that connects patients with nearby pharmacies, allowing them to upload prescriptions and receive responses regarding medicine availability and price estimates. 
 
-## Instructions
+## Setup Instructions
+
+#### To login as a pharmacy use following credentials
+
+Email:healthguide@gmail.com
+Password:1234
+
+Email:medihub@gmail.com
+Password:1234
+
+Email:healthwealth@gmail.com
+Password:1234
+
+#### To login as a patient
+Email:abee@gmail.com
+password:1234
 
 ## Tech stack
 - **Frontend:** Next.js 
